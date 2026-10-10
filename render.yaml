@@ -1,0 +1,35 @@
+# Render Blueprint — The Beauty Hub Salon API
+# Docs: https://render.com/docs/blueprint-spec
+#
+# Deploy via Render Dashboard:
+#   New → Blueprint → connect repo → select this file
+#
+# Or create a Web Service manually using settings in DEPLOYMENT.md
+
+services:
+  - type: web
+    name: beauty-hub-api
+    runtime: node
+    region: singapore
+    plan: free
+    rootDir: server
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CLIENT_URL
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false

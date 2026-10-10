@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-body: "Outfit", system-ui, sans-serif;
+  --color-gold: #c9a962;
+  --color-gold-light: #e8d5a3;
+  --color-gold-dark: #a68b4b;
+  --color-cream: #fdfbf7;
+  --color-beige: #f3efe6;
+  --color-nude: #e6dfd1;
+  --color-brown: #8b7355;
+  --color-charcoal: #1a1a1a;
+  --color-ink: #0d0d0d;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply font-body text-charcoal antialiased transition-colors duration-500;
+    background-color: var(--color-cream);
+    background-image: radial-gradient(at 0% 0%, rgba(201, 169, 98, 0.05) 0px, transparent 50%),
+                      radial-gradient(at 100% 100%, rgba(201, 169, 98, 0.03) 0px, transparent 50%);
+  }
+
+  .dark body,
+  body.dark {
+    @apply text-cream;
+    background-color: var(--color-ink);
+    background-image: radial-gradient(at 0% 0%, rgba(201, 169, 98, 0.03) 0px, transparent 50%),
+                      radial-gradient(at 100% 100%, rgba(201, 169, 98, 0.02) 0px, transparent 50%);
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  .font-body {
+    font-family: var(--font-body);
+  }
+
+  .text-gradient-gold {
+    @apply bg-gradient-to-r from-gold-light via-gold to-gold-dark bg-clip-text text-transparent;
+  }
+
+  .glass {
+    @apply bg-white/10 backdrop-blur-xl border border-white/20;
+  }
+
+  .glass-dark {
+    @apply bg-black/40 backdrop-blur-xl border border-white/10;
+  }
+
+  .luxury-card {
+    @apply rounded-2xl border border-beige/50 bg-white/80 shadow-lg shadow-brown/5 transition-all duration-500;
+  }
+
+  .luxury-card:hover {
+    @apply -translate-y-1 shadow-xl shadow-gold/10 border-gold/30;
+  }
+
+  .dark .luxury-card {
+    @apply bg-charcoal/80 border-white/10;
+  }
+
+  .section-padding {
+    @apply px-4 sm:px-6 lg:px-8 py-20 md:py-28;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-gold-dark via-gold to-gold-light px-8 py-3.5 text-sm font-semibold uppercase tracking-widest text-ink transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-gold/30;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border-2 border-gold/60 px-8 py-3.5 text-sm font-semibold uppercase tracking-widest text-gold transition-all duration-300 hover:bg-gold/10 hover:border-gold;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-cream);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-gold);
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: var(--color-ink);
+}
