@@ -67,13 +67,34 @@ def add_review(review: Review):
 
 @app.get("/api/sentiment")
 def get_sentiment_analysis():
-    file_path = "data/reviews.csv"
-    if not os.path.exists(file_path):
-        return {"error": "Reviews data not found. Run generate_data.py first."}
+    if db is None:
+        return {"error": "Database not connected"}
     
-    df = pd.read_csv(file_path)
+    try:
+        doc = db["testimonials"].find_one({"_id": "array_store"})
+        reviews_data = doc["data"] if doc and "data" in doc else []
+    except Exception as e:
+        reviews_data = []
+
+    if not reviews_data:
+        return {
+            "total_reviews": 0,
+            "positive_pct": 0,
+            "neutral_pct": 0,
+            "negative_pct": 0,
+            "action_required": []
+        }
+
+    df = pd.DataFrame(reviews_data)
     
-    # Run sentiment analysis
+    if 'review' in df.columns:
+        df['review_text'] = df['review']
+    elif 'text' in df.columns:
+        df['review_text'] = df['text']
+    
+    if 'review_text' not in df.columns:
+        df['review_text'] = ""
+
     def analyze_sentiment(text):
         polarity = TextBlob(str(text)).sentiment.polarity
         if polarity > 0.1: return 'Positive'
@@ -82,14 +103,15 @@ def get_sentiment_analysis():
         
     df['sentiment'] = df['review_text'].apply(analyze_sentiment)
     
-    # Aggregate stats
     total = len(df)
     counts = df['sentiment'].value_counts()
     pos_count = int(counts.get('Positive', 0))
     neu_count = int(counts.get('Neutral', 0))
     neg_count = int(counts.get('Negative', 0))
     
-    # Get top negative reviews for attention
+    if 'date' not in df.columns:
+        df['date'] = datetime.now().strftime('%Y-%m-%d')
+        
     negative_reviews = df[df['sentiment'] == 'Negative'][['review_text', 'date']].tail(5).to_dict(orient='records')
     
     return {
