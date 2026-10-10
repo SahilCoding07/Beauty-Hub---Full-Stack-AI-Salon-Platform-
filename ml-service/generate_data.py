@@ -92,7 +92,7 @@ completed_bookings = [b for b in bookings if b['status'] == 'completed']
 sampled_bookings = random.sample(completed_bookings, min(NUM_REVIEWS, len(completed_bookings)))
 
 for i, b in enumerate(sampled_bookings):
-    rating = random.choices([5, 4, 3, 2, 1], weights=[50, 20, 15, 5, 10])[0]
+    rating = 5
     
     if rating >= 4:
         text = random.choice(good_reviews)
