@@ -185,8 +185,18 @@ export const updateSettings = (data: object) =>
   withOfflineMock(api.put('/settings', data), () => ({}));
 
 // Auth
-export const adminLogin = (email: string, password: string) =>
-  api.post('/auth/login', { email, password });
+export const adminLogin = async (email: string, password: string) => {
+  const baseUrl = import.meta.env.VITE_API_URL || '';
+  const url = import.meta.env.DEV ? '/api/auth/login' : `${baseUrl}/api/auth/login`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  });
+  if (!res.ok) throw new Error('Login failed');
+  const data = await res.json();
+  return { data };
+};
 
 export const getDashboardStats = () =>
   withOfflineMock(api.get('/admin/stats'), async () => {
