@@ -15,6 +15,8 @@ import {
 } from '../api/client';
 import type { Booking, Service, Offer, Testimonial } from '../types';
 
+const BASE_URL = import.meta.env.VITE_API_URL || '';
+
 const tabs = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'insights', label: 'AI Insights', icon: Brain },
@@ -145,17 +147,17 @@ function Dashboard() {
     if (activeTab === 'dashboard' || activeTab === 'reviews') getAllTestimonials().then(({ data }) => setTestimonials(data)).catch(() => {});
     if (activeTab === 'gallery') getGallery().then(({ data }) => setGallery(data)).catch(() => {});
             if (activeTab === 'insights') {
-      fetch('/api/sentiment')
+      fetch(`${BASE_URL}/api/sentiment`)
         .then(res => res.json())
         .then(data => setAiInsights(data))
         .catch(err => console.error("ML service offline", err));
         
-      fetch('/api/churn-risk')
+      fetch(`${BASE_URL}/api/churn-risk`)
         .then(res => res.json())
         .then(data => setChurnRisk(data))
         .catch(err => console.error("ML service offline", err));
         
-      fetch('/api/forecast')
+      fetch(`${BASE_URL}/api/forecast`)
         .then(res => res.json())
         .then(data => setDemandForecast(data))
         .catch(err => console.error("ML service offline", err));

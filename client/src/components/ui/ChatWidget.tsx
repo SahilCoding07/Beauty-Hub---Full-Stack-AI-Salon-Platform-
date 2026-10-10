@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, X, Send, Bot, User } from 'lucide-react';
 
+const BASE_URL = import.meta.env.VITE_API_URL || '';
+
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<{role: 'bot' | 'user', text: string}[]>([
@@ -29,7 +31,7 @@ export default function ChatWidget() {
     setIsLoading(true);
 
     try {
-      const res = await fetch('/api/chat', {
+      const res = await fetch(`${BASE_URL}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: userMessage })
