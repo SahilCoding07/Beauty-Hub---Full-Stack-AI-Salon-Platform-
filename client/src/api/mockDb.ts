@@ -1,11 +1,14 @@
 
+
 import { DEFAULT_SERVICES } from '../data/constants';
 
+const BASE_URL = import.meta.env.VITE_API_URL || '';
 
 export const mockDb = {
   get: async (collection: string): Promise<any[]> => {
     try {
-      const res = await fetch(`/api/db/${collection}`);
+      const res = await fetch(`${BASE_URL}/api/db/${collection}`);
+
       const data = await res.json();
       return Array.isArray(data) ? data : [];
     } catch (e) {
@@ -15,7 +18,7 @@ export const mockDb = {
   },
   set: async (collection: string, data: any): Promise<boolean> => {
     try {
-      await fetch(`/api/db/${collection}`, {
+      await fetch(`${BASE_URL}/api/db/${collection}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
