@@ -48,6 +48,8 @@ for i in range(1, NUM_BOOKINGS + 1):
     # Random date between join date and now
     join_date = datetime.strptime(cust['join_date'], '%Y-%m-%d')
     days_since_join = (datetime.now() - join_date).days
+    if days_since_join > 20: join_date = datetime.now() - timedelta(days=20)
+    days_since_join = 20
     if days_since_join < 1: days_since_join = 1
     booking_date = join_date + timedelta(days=random.randint(0, days_since_join))
     
@@ -67,6 +69,11 @@ df_bookings.to_csv('data/bookings.csv', index=False)
 # Generate Reviews
 print("Generating reviews...")
 good_reviews = [
+    "Absolutely amazing and fantastic service! Highly recommend.",
+    "The staff was incredibly polite and the results were absolutely amazing and wonderful.",
+    "My favorite go-to place for all beauty needs. 5 perfect stars!",
+    "Bridal makeup was totally flawless and beautiful. Thank you so much!",
+    "Very clean, exceptionally hygienic, and a truly great experience.",
     "Absolutely loved the service! Highly recommend.",
     "The staff was so polite and the results were amazing.",
     "My go-to place for all beauty needs. 5 stars!",
