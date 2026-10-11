@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, GraduationCap, Calendar, Scissors, Tag, MessageSquare, Image, Settings, LogOut, IndianRupee, Users, Star,
-  Plus, Trash2, Menu, X, Edit, Check, Upload, Camera, Brain, AlertTriangle, TrendingUp, Eye, EyeOff
+  Plus, Trash2, Menu, X, Edit, Check, Upload, Camera, Brain, AlertTriangle, TrendingUp, Eye, EyeOff, Key
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
@@ -359,7 +359,23 @@ function Dashboard() {
             <div className="flex h-8 w-8 items-center justify-center rounded-full border border-gold/50 bg-gold/10 font-display text-sm font-bold text-gold">B</div>
             <span className="font-display font-semibold text-gold">Beauty Hub Admin</span>
           </div>
-          <button onClick={() => setMobileMenuOpen(true)} className="text-gold"><Menu size={24} /></button>
+          <button onClick={() => setMobileMenuOpen(true)} className="text-gold p-1" aria-label="Open navigation menu"><Menu size={24} /></button>
+        </div>
+
+        {/* Mobile Sub-Navigation Bar */}
+        <div className="flex overflow-x-auto gap-2 px-3 py-2.5 bg-ink/80 border-b border-gold/10 lg:hidden">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+                activeTab === tab.id ? 'bg-gold text-ink font-bold shadow' : 'bg-charcoal/80 text-cream/70 border border-beige/10'
+              }`}
+            >
+              <tab.icon size={13} />
+              {tab.label}
+            </button>
+          ))}
         </div>
         <div className="p-4 md:p-8">
         <AnimatePresence mode="wait">
@@ -503,21 +519,98 @@ function Dashboard() {
             )}
 
             {activeTab === 'dashboard' && (
-              <div>
-                <h2 className="mb-6 font-display text-2xl font-semibold">Dashboard Overview</h2>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                  {[
-                    { label: 'Bookings', value: stats.bookings || 0, icon: Calendar },
-                    { label: 'Revenue', value: `₹${(stats.revenue || 0).toLocaleString()}`, icon: IndianRupee },
-                    { label: 'Clients', value: stats.clients || 0, icon: Users },
-                    { label: 'Rating', value: stats.rating || 4.9, icon: Star },
-                  ].map((s, i) => (
-                    <motion.div whileHover={{ y: -5 }} key={i} className="luxury-card p-6 dark:bg-charcoal/60 shadow-xl">
-                      <s.icon size={24} className="mb-4 text-gold" />
-                      <p className="font-display text-3xl font-semibold text-gold">{s.value}</p>
-                      <p className="text-sm text-cream/60 mt-1">{s.label}</p>
-                    </motion.div>
-                  ))}
+              <div className="space-y-8">
+                <div>
+                  <h2 className="mb-6 font-display text-2xl font-semibold">Dashboard Overview</h2>
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    {[
+                      { label: 'Bookings', value: stats.bookings || 0, icon: Calendar },
+                      { label: 'Revenue', value: `₹${(stats.revenue || 0).toLocaleString()}`, icon: IndianRupee },
+                      { label: 'Clients', value: stats.clients || 0, icon: Users },
+                      { label: 'Rating', value: stats.rating || 4.9, icon: Star },
+                    ].map((s, i) => (
+                      <motion.div whileHover={{ y: -5 }} key={i} className="luxury-card p-6 dark:bg-charcoal/60 shadow-xl">
+                        <s.icon size={24} className="mb-4 text-gold" />
+                        <p className="font-display text-3xl font-semibold text-gold">{s.value}</p>
+                        <p className="text-sm text-cream/60 mt-1">{s.label}</p>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Change Admin Credentials Card directly on Dashboard */}
+                <div>
+                  <div className="luxury-card p-6 sm:p-8 dark:bg-charcoal/80 border border-gold/30 shadow-xl">
+                    <div className="mb-5 flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full border border-gold/40 bg-gold/10 text-gold">
+                        <Key size={20} />
+                      </div>
+                      <div>
+                        <h3 className="font-display text-lg sm:text-xl font-semibold text-cream">Admin Login & Security</h3>
+                        <p className="text-xs text-gold/80">Change your admin email and password anytime</p>
+                      </div>
+                    </div>
+
+                    <form onSubmit={handleUpdateCredentials} className="max-w-xl space-y-4">
+                      <div>
+                        <label className="block text-xs uppercase tracking-wider text-cream/70 mb-1.5 font-medium">New Admin Email</label>
+                        <input
+                          type="email"
+                          value={newAdminEmail}
+                          onChange={(e) => setNewAdminEmail(e.target.value)}
+                          placeholder="e.g. servesterkira@gmail.com"
+                          autoCapitalize="none"
+                          autoCorrect="off"
+                          inputMode="email"
+                          className="w-full rounded-xl border border-beige/20 bg-ink/50 px-4 py-3 text-cream placeholder-cream/35 focus:border-gold focus:outline-none text-sm"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs uppercase tracking-wider text-cream/70 mb-1.5 font-medium">New Password</label>
+                        <div className="relative">
+                          <input
+                            type={showNewPw ? 'text' : 'password'}
+                            value={newAdminPassword}
+                            onChange={(e) => setNewAdminPassword(e.target.value)}
+                            placeholder="At least 6 characters"
+                            className="w-full rounded-xl border border-beige/20 bg-ink/50 px-4 py-3 pr-11 text-cream placeholder-cream/35 focus:border-gold focus:outline-none text-sm"
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowNewPw(!showNewPw)}
+                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-cream/50 hover:text-gold p-1"
+                          >
+                            {showNewPw ? <EyeOff size={18} /> : <Eye size={18} />}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs uppercase tracking-wider text-cream/70 mb-1.5 font-medium">Confirm New Password</label>
+                        <input
+                          type={showNewPw ? 'text' : 'password'}
+                          value={confirmAdminPassword}
+                          onChange={(e) => setConfirmAdminPassword(e.target.value)}
+                          placeholder="Re-enter new password"
+                          className="w-full rounded-xl border border-beige/20 bg-ink/50 px-4 py-3 text-cream placeholder-cream/35 focus:border-gold focus:outline-none text-sm"
+                          required
+                        />
+                      </div>
+
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        disabled={updatingCreds}
+                        type="submit"
+                        className="btn-primary shadow-lg shadow-gold/25 !py-3 !px-6 text-xs font-bold mt-2"
+                      >
+                        {updatingCreds ? 'UPDATING CREDENTIALS...' : 'SAVE NEW CREDENTIALS'}
+                      </motion.button>
+                    </form>
+                  </div>
                 </div>
               </div>
             )}
