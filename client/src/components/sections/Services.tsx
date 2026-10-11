@@ -123,7 +123,7 @@ export default function Services() {
                 className="group luxury-card overflow-hidden bg-white/80 dark:bg-charcoal/60 relative"
               >
                 <div className="relative h-52 overflow-hidden">
-                  <a href="/#booking" className="absolute inset-0 z-10" aria-label={`Book ${service.name}`}></a>
+                  <a href="#booking" className="absolute inset-0 z-10" aria-label={`Book ${service.name}`}></a>
                   <img
                     src={service.image || serviceImages[service.name] || categoryImages[service.category]}
                     alt={service.name}
@@ -161,7 +161,7 @@ export default function Services() {
                     </div>
                   </div>
                   <a
-                    href="/#booking"
+                    href="#booking"
                     className="btn-primary mt-5 w-full text-center text-xs !py-2.5"
                   >
                     Book Now

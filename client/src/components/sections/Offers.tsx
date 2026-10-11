@@ -71,7 +71,7 @@ export default function Offers() {
               )}
             </div>
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-              <a href="/#booking" className="btn-primary text-center text-white dark:text-ink">Claim Offer</a>
+              <a href="#booking" className="btn-primary text-center text-white dark:text-ink">Claim Offer</a>
               <a href="#services" className="btn-outline text-center text-charcoal dark:text-cream border-charcoal/20 dark:border-gold/60 hover:border-gold dark:hover:border-gold">View All Offers</a>
             </div>
           </div>

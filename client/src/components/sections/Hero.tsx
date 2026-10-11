@@ -40,7 +40,7 @@ const SHOWCASE_TABS = [
       'Exquisite jewellery & dupatta draping',
     ],
     ctaText: 'Book Bridal Consultation',
-    ctaHref: '/#booking',
+    ctaHref: '#booking',
   },
   {
     id: 'hair-skin',
@@ -181,7 +181,7 @@ export default function Hero() {
             transition={{ delay: 0.8 }}
             className="mt-6 sm:mt-8 flex flex-wrap items-center justify-center gap-3 sm:gap-4 lg:justify-start"
           >
-            <a href="/#booking" className="btn-primary w-full sm:w-auto text-center">Book Appointment</a>
+            <a href="#booking" className="btn-primary w-full sm:w-auto text-center">Book Appointment</a>
             <a href="#services" className="btn-outline w-full sm:w-auto text-center text-charcoal border-charcoal/30 hover:border-gold hover:text-gold dark:text-cream dark:border-cream/30 dark:hover:border-gold dark:hover:text-gold">Explore Services</a>
           </motion.div>
 
