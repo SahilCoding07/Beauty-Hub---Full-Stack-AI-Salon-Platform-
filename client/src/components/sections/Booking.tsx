@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
-import { Check, Smartphone, Building2 } from 'lucide-react';
+import { Check, Smartphone, Building2, CalendarCheck, X } from 'lucide-react';
 import {
   getServices,
   getStaff,
@@ -32,6 +32,7 @@ export default function Booking() {
   const [slots, setSlots] = useState<{ time: string; available: boolean }[]>([]);
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('pay_at_salon');
+  const [bookingSuccessData, setBookingSuccessData] = useState<any | null>(null);
 
   const [form, setForm] = useState({
     serviceId: '',
@@ -139,6 +140,15 @@ export default function Booking() {
 
     try {
       await createBooking({ ...bookingData, paymentStatus: paymentMethod === 'pay_advance' ? 'partial' : 'pending', status: 'pending' });
+      setBookingSuccessData({
+        service: selectedService?.name || form.serviceId,
+        date: form.date,
+        time: form.time,
+        name: form.name,
+        totalAmount,
+        advanceAmount: paymentMethod === 'pay_advance' ? advanceAmount : 0,
+        paymentMethod,
+      });
       toast.success('Booking successfully requested!');
       setStep(0);
       setForm({ serviceId: '', staffId: '', date: '', time: '', name: '', phone: '', email: '', requests: '', couponCode: '' });
@@ -423,6 +433,69 @@ export default function Booking() {
           </div>
         </motion.div>
       </div>
+
+      {/* Luxury Themed Booking Confirmation Modal */}
+      <AnimatePresence>
+        {bookingSuccessData && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="relative w-full max-w-md luxury-card bg-white dark:bg-charcoal p-6 sm:p-8 text-center border border-gold/30 shadow-2xl"
+            >
+              <button
+                onClick={() => setBookingSuccessData(null)}
+                className="absolute right-4 top-4 rounded-full p-1 text-charcoal/50 hover:bg-gold/10 hover:text-gold dark:text-cream/50 transition-colors"
+                aria-label="Close modal"
+              >
+                <X size={20} />
+              </button>
+
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gold/15 text-gold border border-gold/30 shadow-inner">
+                <CalendarCheck size={32} />
+              </div>
+
+              <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-gold">
+                ✦ Appointment Requested ✦
+              </span>
+
+              <h3 className="font-display text-2xl sm:text-3xl font-bold text-charcoal dark:text-cream mt-2">
+                Booking Confirmed!
+              </h3>
+
+              <p className="mt-2 text-sm text-charcoal/70 dark:text-cream/70 leading-relaxed">
+                Thank you, <strong className="text-gold font-semibold">{bookingSuccessData.name}</strong>! We have received your appointment request.
+              </p>
+
+              <div className="mt-5 rounded-2xl border border-gold/20 bg-gold/5 p-4 text-left space-y-2 text-xs sm:text-sm">
+                <div className="flex justify-between">
+                  <span className="text-charcoal/60 dark:text-cream/60">Service</span>
+                  <span className="font-semibold text-charcoal dark:text-cream">{bookingSuccessData.service}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-charcoal/60 dark:text-cream/60">Date & Time</span>
+                  <span className="font-semibold text-charcoal dark:text-cream">{bookingSuccessData.date} at {bookingSuccessData.time}</span>
+                </div>
+                <div className="flex justify-between border-t border-gold/15 pt-2">
+                  <span className="text-charcoal/60 dark:text-cream/60">Total Amount</span>
+                  <span className="font-bold text-gold">₹{bookingSuccessData.totalAmount}</span>
+                </div>
+              </div>
+
+              <div className="mt-6 flex flex-col gap-3">
+                <button
+                  onClick={() => setBookingSuccessData(null)}
+                  className="btn-primary w-full !py-3 text-xs sm:text-sm"
+                >
+                  Done
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }

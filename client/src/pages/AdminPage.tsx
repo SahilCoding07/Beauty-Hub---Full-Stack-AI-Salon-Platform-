@@ -370,7 +370,7 @@ function Dashboard() {
                                     <p className="text-xs text-cream/70 mt-1">📞 {c.phone}</p>
                                     <p className="text-sm text-red-400 mt-1">Last visit: {c.days_since} days ago (Risk Score: {c.risk_score}%)</p>
                                   </div>
-                                  <button onClick={() => alert('Offer sent to ' + c.phone + '!')} className="btn-primary text-xs !px-4 !py-2 shrink-0">
+                                  <button onClick={() => toast.success(`20% Retention offer sent to ${c.name} (${c.phone})!`)} className="btn-primary text-xs !px-4 !py-2 shrink-0">
                                     Send 20% Retention Offer
                                   </button>
                                 </div>

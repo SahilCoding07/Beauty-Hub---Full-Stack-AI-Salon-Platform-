@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Star, Upload } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Star, Upload, ExternalLink, X, HeartHandshake } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { submitReview } from '../../api/client';
 
@@ -8,6 +8,7 @@ export default function Reviews() {
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [showGoogleModal, setShowGoogleModal] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', service: '', review: '' });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -26,11 +27,14 @@ export default function Reviews() {
       setRating(0);
       setLoading(false);
       setTimeout(() => {
-        if (window.confirm("Would you also like to share your review on Google to support us?")) {
-          window.open("https://www.google.com/maps/search/Beauty+Hub+Salon+and+Academy+Bilaspur/", "_blank");
-        }
-      }, 500);
+        setShowGoogleModal(true);
+      }, 400);
     }
+  };
+
+  const handleOpenGoogle = () => {
+    window.open("https://www.google.com/maps/search/Beauty+Hub+Salon+and+Academy+Bilaspur/", "_blank");
+    setShowGoogleModal(false);
   };
 
   return (
@@ -122,6 +126,62 @@ export default function Reviews() {
           </button>
         </motion.form>
       </div>
+
+      {/* Luxury Themed Google Review Modal */}
+      <AnimatePresence>
+        {showGoogleModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="relative w-full max-w-md luxury-card bg-white dark:bg-charcoal p-6 sm:p-8 text-center border border-gold/30 shadow-2xl"
+            >
+              <button
+                onClick={() => setShowGoogleModal(false)}
+                className="absolute right-4 top-4 rounded-full p-1 text-charcoal/50 hover:bg-gold/10 hover:text-gold dark:text-cream/50 transition-colors"
+                aria-label="Close modal"
+              >
+                <X size={20} />
+              </button>
+
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gold/15 text-gold border border-gold/30 shadow-inner">
+                <HeartHandshake size={32} />
+              </div>
+
+              <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-gold">
+                ✦ Your Voice Matters ✦
+              </span>
+
+              <h3 className="font-display text-2xl sm:text-3xl font-bold text-charcoal dark:text-cream mt-2">
+                Thank You for Your Review!
+              </h3>
+
+              <p className="mt-3 text-sm text-charcoal/70 dark:text-cream/70 leading-relaxed">
+                Your feedback helps us continuously elevate our services. Would you also like to support <strong className="text-gold font-semibold">The Beauty Hub</strong> by posting your review on our Google Maps profile?
+              </p>
+
+              <div className="mt-6 flex flex-col gap-3">
+                <button
+                  onClick={handleOpenGoogle}
+                  className="btn-primary w-full flex items-center justify-center gap-2 !py-3 text-xs sm:text-sm shadow-lg shadow-gold/25"
+                >
+                  <span>Share on Google</span>
+                  <ExternalLink size={16} />
+                </button>
+
+                <button
+                  onClick={() => setShowGoogleModal(false)}
+                  className="rounded-full py-2.5 text-xs text-charcoal/60 dark:text-cream/60 hover:text-gold dark:hover:text-gold font-medium transition-colors"
+                >
+                  Maybe Later
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
