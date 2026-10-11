@@ -7,7 +7,7 @@ import {
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import {
-  getDashboardStats, getBookings, updateBookingStatus, getServices, deleteService, createService, updateService,
+  getDashboardStats, getBookings, updateBookingStatus, deleteBooking, getServices, deleteService, createService, updateService,
   getOffers, deleteOffer, createOffer, getCourses, createCourse, deleteCourse,
   getAllTestimonials, approveTestimonial, deleteTestimonial,
   getGallery, createGalleryItem, deleteGalleryItem,
@@ -244,6 +244,19 @@ function Dashboard() {
       toast.success(`Booking ${status}`);
       loadData();
     } catch { toast.error('Failed to update'); }
+  };
+
+  const handleDeleteBooking = async (id: string) => {
+    if (!window.confirm('Are you sure you want to permanently delete this booking? This action cannot be undone.')) {
+      return;
+    }
+    try {
+      await deleteBooking(id);
+      toast.success('Booking permanently removed');
+      loadData();
+    } catch {
+      toast.error('Failed to delete booking');
+    }
   };
 
   const handleAddService = async (e: React.FormEvent) => {
@@ -631,11 +644,11 @@ function Dashboard() {
                         {b.specialRequests && <p className="text-sm text-gold/80 italic mb-1">📝 Note: {b.specialRequests}</p>}
                         {(b as any).paymentMethod && <p className="text-xs text-cream/80">💳 {(b as any).paymentMethod === 'pay_advance' ? `Pay Advance (₹${b.advanceAmount}) via UPI` : 'Pay Full Amount at Salon'} | Total: ₹{b.totalAmount}</p>}
                       </div>
-                      <div className="mt-4 flex gap-2 sm:mt-0">
+                      <div className="mt-4 flex flex-wrap items-center gap-2 sm:mt-0">
                         {b.status === 'pending' && (
                           <>
                             <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => handleBookingAction(b._id, 'confirmed')} className="rounded-lg bg-green-500/20 px-4 py-2 text-sm text-green-400 hover:bg-green-500/30 font-medium">Confirm</motion.button>
-                            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => handleBookingAction(b._id, 'cancelled')} className="rounded-lg bg-red-500/20 px-4 py-2 text-sm text-red-400 hover:bg-red-500/30 font-medium">Cancel</motion.button>
+                            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => handleBookingAction(b._id, 'cancelled')} className="rounded-lg bg-yellow-500/20 px-4 py-2 text-sm text-yellow-400 hover:bg-yellow-500/30 font-medium">Cancel</motion.button>
                           </>
                         )}
                         {b.status !== 'pending' && (
@@ -643,6 +656,17 @@ function Dashboard() {
                             {b.status}
                           </span>
                         )}
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => handleDeleteBooking(b._id)}
+                          title="Permanently Delete Booking"
+                          aria-label="Permanently Delete Booking"
+                          className="flex items-center gap-1.5 rounded-lg bg-red-500/15 hover:bg-red-500/25 px-3 py-2 text-xs font-semibold text-red-400 transition-colors border border-red-500/30"
+                        >
+                          <Trash2 size={15} />
+                          <span>Delete</span>
+                        </motion.button>
                       </div>
                     </motion.div>
                   ))}

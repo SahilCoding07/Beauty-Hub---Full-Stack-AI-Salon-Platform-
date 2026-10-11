@@ -92,4 +92,16 @@ router.patch('/:id/status', authMiddleware, async (req, res) => {
   }
 });
 
+router.delete('/:id', authMiddleware, async (req, res) => {
+  try {
+    const booking = await Booking.findByIdAndDelete(req.params.id);
+    if (!booking) {
+      return res.status(404).json({ error: 'Booking not found' });
+    }
+    res.json({ message: 'Booking permanently deleted', id: req.params.id });
+  } catch {
+    res.status(500).json({ error: 'Failed to delete booking' });
+  }
+});
+
 export default router;

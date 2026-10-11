@@ -106,6 +106,9 @@ export const getBookings = () =>
 export const updateBookingStatus = (id: string, status: string) =>
   withOfflineMock(api.patch(`/bookings/${id}/status`, { status }), async () => await mockDb.update('bookings', id, { status }));
 
+export const deleteBooking = (id: string) =>
+  withOfflineMock(api.delete(`/bookings/${id}`), async () => await mockDb.remove('bookings', id));
+
 // Payments
 export const createPaymentOrder = (data: object) =>
   withOfflineMock(api.post('/payments/create-order', data), () => ({ orderId: 'mock_order_123', amount: 5000 }));
