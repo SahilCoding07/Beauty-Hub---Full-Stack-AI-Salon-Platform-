@@ -9,7 +9,7 @@ export default defineConfig({
     // Dev only: proxy /api → backend. Production uses VITE_API_URL (see src/api/config.ts).
     proxy: {
       '/api': {
-        target: 'http://172.16.9.47:8000',
+        target: 'http://localhost:5001',
         changeOrigin: true,
       },
     },
