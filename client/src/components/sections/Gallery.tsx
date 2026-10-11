@@ -39,7 +39,7 @@ export default function Gallery() {
           </h2>
         </motion.div>
 
-        <div className="mt-12 columns-2 gap-4 md:columns-3 lg:columns-4">
+        <div className="mt-10 sm:mt-12 columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-3 sm:gap-4">
           {items.map((item, i) => (
             <motion.div
               key={item._id}

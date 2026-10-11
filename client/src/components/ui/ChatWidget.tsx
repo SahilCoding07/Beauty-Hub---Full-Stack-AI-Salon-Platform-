@@ -51,12 +51,13 @@ export default function ChatWidget() {
       <motion.button
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.92 }}
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-6 left-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gold text-ink shadow-lg shadow-gold/20 ${isOpen ? 'hidden' : 'flex'}`}
+        className={`fixed bottom-5 left-4 sm:bottom-6 sm:left-6 z-40 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-gold text-ink shadow-lg shadow-gold/30 ${isOpen ? 'hidden' : 'flex'}`}
+        aria-label="Open AI Assistant"
       >
-        <MessageSquare size={24} />
+        <MessageSquare className="h-5 w-5 sm:h-6 sm:w-6" />
       </motion.button>
 
       {/* Chat Window */}
@@ -66,7 +67,7 @@ export default function ChatWidget() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-6 left-6 z-50 flex h-[500px] w-[350px] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-charcoal border border-gold/20"
+            className="fixed inset-x-3 bottom-3 sm:inset-auto sm:bottom-6 sm:left-6 z-50 flex h-[78vh] sm:h-[500px] max-h-[560px] w-auto sm:w-[360px] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-charcoal border border-gold/30"
           >
             {/* Header */}
             <div className="flex items-center justify-between bg-gold p-4 text-ink">

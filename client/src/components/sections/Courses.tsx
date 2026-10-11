@@ -181,12 +181,12 @@ export default function Courses() {
 
             <AnimatePresence>
         {viewingCourse && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 sm:p-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="relative w-full max-w-lg luxury-card bg-white p-8 dark:bg-charcoal max-h-[90vh] overflow-y-auto"
+              className="relative w-full max-w-lg luxury-card bg-white p-5 sm:p-8 dark:bg-charcoal max-h-[88vh] overflow-y-auto"
             >
               <button onClick={() => setViewingCourse(null)} className="absolute right-4 top-4 text-charcoal/50 hover:text-gold dark:text-cream/50"><X size={20} /></button>
               
@@ -230,12 +230,12 @@ export default function Courses() {
 
       <AnimatePresence>
         {enrollingCourse && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 sm:p-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="relative w-full max-w-md luxury-card bg-white p-6 dark:bg-charcoal"
+              className="relative w-full max-w-md luxury-card bg-white p-5 sm:p-6 dark:bg-charcoal max-h-[90vh] overflow-y-auto"
             >
               <button
                 onClick={() => setEnrollingCourse(null)}

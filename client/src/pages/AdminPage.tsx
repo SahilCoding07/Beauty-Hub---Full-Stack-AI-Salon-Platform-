@@ -312,7 +312,9 @@ function Dashboard() {
                 ) : (
                   <div className="space-y-8">
                     <div className="luxury-card p-6 dark:bg-charcoal/60">
-                      <h3 className="mb-4 text-lg font-semibold text-gold">Customer Satisfaction (Last 400 Reviews)</h3>
+                      <h3 className="mb-4 text-lg font-semibold text-gold">
+                        Customer Satisfaction {aiInsights.total_reviews ? `(Live: ${aiInsights.total_reviews} ${aiInsights.total_reviews === 1 ? 'Review' : 'Reviews'})` : '(Live Analytics)'}
+                      </h3>
                       <div className="flex items-center gap-4">
                         <div className="flex-1 h-4 rounded-full bg-ink/50 overflow-hidden flex">
                           <div style={{ width: `${aiInsights.positive_pct}%` }} className="bg-green-500 h-full"></div>

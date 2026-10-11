@@ -37,9 +37,9 @@ export default function About() {
                 </motion.div>
               ))}
             </div>
-            <div className="absolute -bottom-6 -right-6 rounded-2xl bg-gold px-8 py-6 text-ink shadow-xl">
-              <p className="font-display text-4xl font-bold">{SALON.stats.yearsExperience}+</p>
-              <p className="text-sm uppercase tracking-widest">Years of Excellence</p>
+            <div className="absolute -bottom-4 right-2 sm:-bottom-6 sm:-right-6 rounded-xl sm:rounded-2xl bg-gold px-5 py-4 sm:px-8 sm:py-6 text-ink shadow-xl">
+              <p className="font-display text-2xl sm:text-4xl font-bold">{SALON.stats.yearsExperience}+</p>
+              <p className="text-xs sm:text-sm uppercase tracking-wider sm:tracking-widest">Years of Excellence</p>
             </div>
           </motion.div>
 

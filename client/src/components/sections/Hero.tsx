@@ -130,7 +130,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="font-display text-5xl font-semibold leading-tight text-charcoal dark:text-cream sm:text-6xl lg:text-7xl"
+            className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold leading-tight text-charcoal dark:text-cream"
           >
             {SALON.tagline.split(' ').slice(0, 2).join(' ')}{' '}
             <span className="text-gradient-gold italic">
@@ -142,7 +142,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
-            className="mt-6 max-w-xl text-lg text-charcoal/70 dark:text-cream/70 lg:mx-0 mx-auto"
+            className="mt-4 sm:mt-6 max-w-xl text-base sm:text-lg text-charcoal/70 dark:text-cream/70 lg:mx-0 mx-auto"
           >
             Transform your beauty journey with luxury treatments crafted by experts who understand the art of elegance.
           </motion.p>
@@ -151,10 +151,10 @@ export default function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8 }}
-            className="mt-8 flex flex-wrap items-center justify-center gap-4 lg:justify-start"
+            className="mt-6 sm:mt-8 flex flex-wrap items-center justify-center gap-3 sm:gap-4 lg:justify-start"
           >
-            <a href="/#booking" className="btn-primary">Book Appointment</a>
-            <a href="#services" className="btn-outline text-charcoal border-charcoal/30 hover:border-gold hover:text-gold dark:text-cream dark:border-cream/30 dark:hover:border-gold dark:hover:text-gold">Explore Services</a>
+            <a href="/#booking" className="btn-primary w-full sm:w-auto text-center">Book Appointment</a>
+            <a href="#services" className="btn-outline w-full sm:w-auto text-center text-charcoal border-charcoal/30 hover:border-gold hover:text-gold dark:text-cream dark:border-cream/30 dark:hover:border-gold dark:hover:text-gold">Explore Services</a>
           </motion.div>
 
           <motion.a
@@ -164,7 +164,7 @@ export default function Hero() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1 }}
-            className="mt-6 inline-flex items-center gap-2 text-sm text-gold/80 transition hover:text-gold"
+            className="mt-5 sm:mt-6 inline-flex items-center gap-2 text-xs sm:text-sm text-gold/80 transition hover:text-gold"
           >
             <InstagramIcon size={16} />
             Follow {SALON.instagram}
@@ -174,7 +174,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1 }}
-            className="mt-12 grid grid-cols-3 gap-6 border-t border-gold/20 pt-8"
+            className="mt-8 sm:mt-12 grid grid-cols-3 gap-2 sm:gap-6 border-t border-gold/20 pt-6 sm:pt-8"
           >
             {[
               { label: 'Happy Clients', value: SALON.stats.happyClients },
@@ -182,10 +182,10 @@ export default function Hero() {
               { label: 'Experts', value: SALON.stats.experts },
             ].map((stat) => (
               <div key={stat.label} className="text-center lg:text-left">
-                <p className="font-display text-3xl font-bold text-gold">
+                <p className="font-display text-2xl sm:text-3xl font-bold text-gold">
                   <AnimatedCounter target={stat.value} suffix={stat.label === 'Happy Clients' ? '+' : ''} />
                 </p>
-                <p className="mt-1 text-xs uppercase tracking-widest text-charcoal/50 dark:text-cream/50">{stat.label}</p>
+                <p className="mt-1 text-[10px] sm:text-xs uppercase tracking-wider sm:tracking-widest text-charcoal/50 dark:text-cream/50">{stat.label}</p>
               </div>
             ))}
           </motion.div>
@@ -306,7 +306,7 @@ export default function Hero() {
         href="#about"
         animate={{ y: [0, 8, 0] }}
         transition={{ duration: 2, repeat: Infinity }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-gold/60 hover:text-gold"
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-1 text-gold/60 hover:text-gold"
       >
         <span className="text-xs uppercase tracking-widest">Scroll</span>
         <ChevronDown size={20} />

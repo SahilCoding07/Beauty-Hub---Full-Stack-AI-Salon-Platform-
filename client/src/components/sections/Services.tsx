@@ -89,14 +89,14 @@ export default function Services() {
           </p>
         </motion.div>
 
-        <div className="mt-10 flex flex-wrap justify-center gap-2">
+        <div className="mt-8 sm:mt-10 flex gap-2 overflow-x-auto pb-3 pt-1 px-1 sm:flex-wrap sm:justify-center no-scrollbar">
           {SERVICE_CATEGORIES.map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`rounded-full px-5 py-2 text-xs uppercase tracking-widest transition-all duration-300 ${
+              className={`shrink-0 rounded-full px-4 sm:px-5 py-2 text-xs uppercase tracking-wider sm:tracking-widest transition-all duration-300 ${
                 activeCategory === cat
-                  ? 'bg-gold text-white dark:text-ink font-semibold'
+                  ? 'bg-gold text-white dark:text-ink font-semibold shadow-md'
                   : 'border border-gold/30 text-gold/70 hover:border-gold hover:text-gold'
               }`}
             >

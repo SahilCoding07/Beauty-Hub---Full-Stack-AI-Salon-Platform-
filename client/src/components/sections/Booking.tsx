@@ -250,7 +250,7 @@ export default function Booking() {
               {form.date && (
                 <div>
                   <label className="mb-2 block text-sm text-charcoal/60 dark:text-cream/60">Select Time</label>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {slots.map((slot) => (
                       <button
                         key={slot.time}
