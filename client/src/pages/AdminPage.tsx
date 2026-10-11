@@ -238,6 +238,37 @@ function Dashboard() {
     if (activeTab === 'before-after') getBeforeAfter().then(({ data }) => setBeforeAfter(data)).catch(() => {});
   }, [activeTab]);
 
+  // Luxury Delete Confirmation Modal state
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    itemName?: string;
+    description?: string;
+    actionText?: string;
+    onConfirm: () => Promise<void> | void;
+  }>({
+    isOpen: false,
+    title: '',
+    onConfirm: () => {},
+  });
+
+  const requestDelete = (config: {
+    title: string;
+    itemName?: string;
+    description?: string;
+    actionText?: string;
+    onConfirm: () => Promise<void> | void;
+  }) => {
+    setDeleteModal({
+      isOpen: true,
+      ...config,
+    });
+  };
+
+  const closeDeleteModal = () => {
+    setDeleteModal((prev) => ({ ...prev, isOpen: false }));
+  };
+
   const handleBookingAction = async (id: string, status: string) => {
     try {
       await updateBookingStatus(id, status);
@@ -246,17 +277,22 @@ function Dashboard() {
     } catch { toast.error('Failed to update'); }
   };
 
-  const handleDeleteBooking = async (id: string) => {
-    if (!window.confirm('Are you sure you want to permanently delete this booking? This action cannot be undone.')) {
-      return;
-    }
-    try {
-      await deleteBooking(id);
-      toast.success('Booking permanently removed');
-      loadData();
-    } catch {
-      toast.error('Failed to delete booking');
-    }
+  const handleDeleteBooking = (b: Booking) => {
+    requestDelete({
+      title: 'Delete Booking',
+      itemName: `${b.customerName} · ${new Date(b.date).toLocaleDateString()} (${b.time})`,
+      description: 'Are you sure you want to permanently erase this appointment? It will be removed from your salon schedule and database.',
+      actionText: 'Delete Booking',
+      onConfirm: async () => {
+        try {
+          await deleteBooking(b._id);
+          toast.success('Booking permanently removed');
+          loadData();
+        } catch {
+          toast.error('Failed to delete booking');
+        }
+      },
+    });
   };
 
   const handleAddService = async (e: React.FormEvent) => {
@@ -659,7 +695,7 @@ function Dashboard() {
                         <motion.button
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
-                          onClick={() => handleDeleteBooking(b._id)}
+                          onClick={() => handleDeleteBooking(b)}
                           title="Permanently Delete Booking"
                           aria-label="Permanently Delete Booking"
                           className="flex items-center gap-1.5 rounded-lg bg-red-500/15 hover:bg-red-500/25 px-3 py-2 text-xs font-semibold text-red-400 transition-colors border border-red-500/30"
@@ -727,7 +763,23 @@ function Dashboard() {
                       </div>
                       <div className="flex gap-1">
                         <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => { setEditingServiceId(s._id); setNewService({ name: s.name, category: s.category, price: String(s.price), duration: String(s.duration), description: s.description || '', image: s.image || '' }); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-gold p-2 hover:bg-gold/10 rounded-full"><Edit size={18} /></motion.button>
-                        <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => deleteService(s._id).then(() => { toast.success('Deleted'); loadData(); })} className="text-red-400 p-2 hover:bg-red-400/10 rounded-full"><Trash2 size={18} /></motion.button>
+                        <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => {
+                          requestDelete({
+                            title: 'Delete Service',
+                            itemName: s.name,
+                            description: `Are you sure you want to remove "${s.name}"? It will no longer appear on your live salon services menu.`,
+                            actionText: 'Delete Service',
+                            onConfirm: async () => {
+                              try {
+                                await deleteService(s._id);
+                                toast.success('Service deleted');
+                                loadData();
+                              } catch {
+                                toast.error('Failed to delete service');
+                              }
+                            },
+                          });
+                        }} className="text-red-400 p-2 hover:bg-red-400/10 rounded-full" title="Delete Service"><Trash2 size={18} /></motion.button>
                       </div>
                     </motion.div>
                   ))}
@@ -754,7 +806,23 @@ function Dashboard() {
                       <h3 className="font-semibold text-xl text-gold">{c.title}</h3>
                       <p className="text-sm text-cream/80 mt-1 font-medium">{c.duration} | ₹{c.fees}</p>
                       <p className="mt-3 text-sm text-cream/60 leading-relaxed">{c.description}</p>
-                      <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => deleteCourse(c._id).then(() => { toast.success('Deleted'); loadData(); })} className="mt-4 rounded-lg bg-red-500/10 px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-500/20">Remove Course</motion.button>
+                      <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => {
+                        requestDelete({
+                          title: 'Remove Course',
+                          itemName: c.title,
+                          description: `Are you sure you want to remove "${c.title}" from the Academy catalog?`,
+                          actionText: 'Remove Course',
+                          onConfirm: async () => {
+                            try {
+                              await deleteCourse(c._id);
+                              toast.success('Course removed');
+                              loadData();
+                            } catch {
+                              toast.error('Failed to remove course');
+                            }
+                          },
+                        });
+                      }} className="mt-4 rounded-lg bg-red-500/10 px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-500/20">Remove Course</motion.button>
                     </motion.div>
                   ))}
                 </div>
@@ -782,7 +850,23 @@ function Dashboard() {
                         <p className="text-md text-gold mt-1">{o.discount}% off {o.code ? `· Code: ${o.code}` : ''}</p>
                         <p className="text-sm text-cream/60 mt-2">{o.description}</p>
                       </div>
-                      <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => deleteOffer(o._id).then(() => { toast.success('Deleted'); loadData(); })} className="text-red-400 self-end mt-4 p-2 bg-red-400/10 rounded-full"><Trash2 size={18} /></motion.button>
+                      <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => {
+                        requestDelete({
+                          title: 'Delete Special Offer',
+                          itemName: o.title,
+                          description: `Are you sure you want to delete this promotional offer? It will be removed from your website banners.`,
+                          actionText: 'Delete Offer',
+                          onConfirm: async () => {
+                            try {
+                              await deleteOffer(o._id);
+                              toast.success('Offer deleted');
+                              loadData();
+                            } catch {
+                              toast.error('Failed to delete offer');
+                            }
+                          },
+                        });
+                      }} className="text-red-400 self-end mt-4 p-2 bg-red-400/10 rounded-full hover:bg-red-400/20" title="Delete Offer"><Trash2 size={18} /></motion.button>
                     </motion.div>
                   ))}
                 </div>
@@ -808,7 +892,23 @@ function Dashboard() {
                       <img src={g.image} alt="Gallery" className="h-48 w-full object-cover transition duration-500 group-hover:scale-110" />
                       <div className="absolute inset-0 bg-ink/60 opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex flex-col items-center justify-center gap-2">
                         <span className="text-white font-semibold tracking-wider uppercase text-xs">{g.category}</span>
-                        <motion.button whileHover={{ scale: 1.1 }} onClick={() => deleteGalleryItem(g._id).then(() => { toast.success('Deleted'); loadData(); })} className="rounded-full bg-red-500/80 p-3 text-white shadow-lg"><Trash2 size={20} /></motion.button>
+                        <motion.button whileHover={{ scale: 1.1 }} onClick={() => {
+                          requestDelete({
+                            title: 'Delete Portfolio Photo',
+                            itemName: `${g.category} Look`,
+                            description: `Are you sure you want to permanently remove this look from your salon portfolio?`,
+                            actionText: 'Delete Photo',
+                            onConfirm: async () => {
+                              try {
+                                await deleteGalleryItem(g._id);
+                                toast.success('Photo removed');
+                                loadData();
+                              } catch {
+                                toast.error('Failed to delete photo');
+                              }
+                            },
+                          });
+                        }} className="rounded-full bg-red-500/80 p-3 text-white shadow-lg hover:bg-red-600 transition-colors" title="Delete Photo"><Trash2 size={20} /></motion.button>
                       </div>
                     </motion.div>
                   ))}
@@ -847,7 +947,23 @@ function Dashboard() {
                       </div>
                       <div className="p-5 flex justify-between items-center dark:bg-charcoal/80">
                         <p className="font-display font-semibold text-xl">{ba.title}</p>
-                        <motion.button whileHover={{ scale: 1.1 }} onClick={() => deleteBeforeAfter(ba._id).then(() => { toast.success('Deleted'); loadData(); })} className="text-red-400 p-2 bg-red-400/10 rounded-full"><Trash2 size={18} /></motion.button>
+                        <motion.button whileHover={{ scale: 1.1 }} onClick={() => {
+                          requestDelete({
+                            title: 'Delete Transformation',
+                            itemName: ba.title,
+                            description: `Are you sure you want to delete the transformation for "${ba.title}"?`,
+                            actionText: 'Delete Transformation',
+                            onConfirm: async () => {
+                              try {
+                                await deleteBeforeAfter(ba._id);
+                                toast.success('Transformation deleted');
+                                loadData();
+                              } catch {
+                                toast.error('Failed to delete transformation');
+                              }
+                            },
+                          });
+                        }} className="text-red-400 p-2 bg-red-400/10 rounded-full hover:bg-red-400/20" title="Delete Transformation"><Trash2 size={18} /></motion.button>
                       </div>
                     </motion.div>
                   ))}
@@ -873,7 +989,23 @@ function Dashboard() {
                         {!t.isApproved && (
                           <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => approveTestimonial(t._id).then(() => { toast.success('Approved'); loadData(); })} className="text-green-400 p-3 bg-green-400/10 rounded-full hover:bg-green-400/20"><Check size={20} /></motion.button>
                         )}
-                        <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => deleteTestimonial(t._id).then(() => { toast.success('Deleted'); loadData(); })} className="text-red-400 p-3 bg-red-400/10 rounded-full hover:bg-red-400/20"><Trash2 size={20} /></motion.button>
+                        <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => {
+                          requestDelete({
+                            title: 'Delete Client Review',
+                            itemName: `Review by ${t.name}`,
+                            description: `Are you sure you want to permanently delete this testimonial review?`,
+                            actionText: 'Delete Review',
+                            onConfirm: async () => {
+                              try {
+                                await deleteTestimonial(t._id);
+                                toast.success('Review deleted');
+                                loadData();
+                              } catch {
+                                toast.error('Failed to delete review');
+                              }
+                            },
+                          });
+                        }} className="text-red-400 p-3 bg-red-400/10 rounded-full hover:bg-red-400/20" title="Delete Review"><Trash2 size={20} /></motion.button>
                       </div>
                     </motion.div>
                   ))}
@@ -975,6 +1107,79 @@ function Dashboard() {
         </AnimatePresence>
         </div>
       </main>
+
+      {/* Redesigned Luxury Delete Confirmation Modal */}
+      <AnimatePresence>
+        {deleteModal.isOpen && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4"
+            onClick={closeDeleteModal}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ duration: 0.2 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-md luxury-card bg-charcoal/95 dark:bg-charcoal border border-gold/40 shadow-2xl rounded-2xl p-6 sm:p-8 text-center overflow-hidden"
+            >
+              {/* Luxury gold and crimson glow effects */}
+              <div className="absolute -top-16 -left-16 h-36 w-36 rounded-full bg-gold/15 blur-2xl pointer-events-none" />
+              <div className="absolute -bottom-16 -right-16 h-36 w-36 rounded-full bg-red-500/15 blur-2xl pointer-events-none" />
+
+              <button
+                type="button"
+                onClick={closeDeleteModal}
+                className="absolute right-3.5 top-3.5 rounded-full p-2 text-cream/50 hover:bg-white/10 hover:text-cream transition-colors"
+                aria-label="Close"
+              >
+                <X size={18} />
+              </button>
+
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-500/15 border border-red-500/40 text-red-400 shadow-inner">
+                <Trash2 size={28} />
+              </div>
+
+              <h3 className="font-display text-2xl font-bold text-cream">
+                {deleteModal.title}
+              </h3>
+
+              {deleteModal.itemName && (
+                <div className="mt-2 inline-flex max-w-full items-center justify-center rounded-full border border-gold/40 bg-gold/10 px-3.5 py-1 text-xs font-semibold text-gold">
+                  <span className="truncate">{deleteModal.itemName}</span>
+                </div>
+              )}
+
+              <p className="mt-3.5 text-xs sm:text-sm text-cream/70 leading-relaxed">
+                {deleteModal.description || 'Are you sure you want to permanently delete this item? This action cannot be undone.'}
+              </p>
+
+              <div className="mt-6 flex items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={closeDeleteModal}
+                  className="flex-1 rounded-xl border border-cream/20 bg-ink/40 hover:bg-ink/70 hover:border-gold/40 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-cream/80 hover:text-cream transition-colors"
+                >
+                  Cancel
+                </button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  type="button"
+                  onClick={async () => {
+                    const action = deleteModal.onConfirm;
+                    closeDeleteModal();
+                    await action();
+                  }}
+                  className="flex-1 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 px-4 py-3 text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-red-950/50 transition-all border border-red-400/30"
+                >
+                  {deleteModal.actionText || 'Delete Permanently'}
+                </motion.button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
