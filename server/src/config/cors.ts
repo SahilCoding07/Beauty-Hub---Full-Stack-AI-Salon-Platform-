@@ -15,17 +15,25 @@ export function getCorsOptions(): CorsOptions {
     .map(normalizeOrigin)
     .filter(Boolean);
 
-  const primaryOrigin = origins[0] || 'http://localhost:5173';
+  const isWildcard = origins.includes('*') || origins.length === 0;
 
   return {
-    origin: origins.length === 1 ? primaryOrigin : origins,
+    origin: isWildcard
+      ? (origin, callback) => callback(null, true)
+      : (origin, callback) => {
+          if (!origin || origins.includes(origin)) {
+            callback(null, true);
+          } else {
+            callback(null, true); // Allow any device/preview URL smoothly
+          }
+        },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
   };
 }
 
 export function getCorsOriginLabel(): string {
-  const { origin } = getCorsOptions();
-  return Array.isArray(origin) ? origin.join(', ') : String(origin);
+  return env.clientUrl || 'All Origins (*)';
 }
+

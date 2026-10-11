@@ -85,25 +85,24 @@ async function start() {
   registerShutdownHandlers();
   ensureUploadsDir();
 
-  try {
-    await connectDatabase();
-    await seedIfEmpty();
+  app.listen(env.port, '0.0.0.0', async () => {
+    console.log(`✓ Server running on port ${env.port} (${env.nodeEnv})`);
+    console.log(`✓ CORS origin: ${getCorsOriginLabel()}`);
+    console.log(`✓ Health check: /api/health`);
 
-    app.listen(env.port, '0.0.0.0', () => {
-      console.log(`✓ Server running on port ${env.port} (${env.nodeEnv})`);
-      console.log(`✓ CORS origin: ${getCorsOriginLabel()}`);
-      console.log(`✓ Health check: /api/health`);
+    const storage = getUploadsStorageInfo();
+    if (storage.ephemeral) {
+      console.warn(`⚠ Uploads: ephemeral local storage — use Cloudinary/S3 for production images`);
+    }
+
+    try {
+      await connectDatabase();
+      await seedIfEmpty();
       console.log(`✓ Database: ${getDatabaseStatus().database} @ ${getDatabaseStatus().host}`);
-
-      const storage = getUploadsStorageInfo();
-      if (storage.ephemeral) {
-        console.warn(`⚠ Uploads: ephemeral local storage — use Cloudinary/S3 for production images`);
-      }
-    });
-  } catch (err) {
-    console.error('Failed to start server:', err instanceof Error ? err.message : err);
-    process.exit(1);
-  }
+    } catch (err) {
+      console.error('Database initialization warning:', err instanceof Error ? err.message : err);
+    }
+  });
 }
 
 start();

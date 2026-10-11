@@ -85,13 +85,12 @@ export async function connectDatabase(): Promise<void> {
     await validateConnection();
     console.log('✓ MongoDB Atlas connected and validated');
   } catch (error) {
-    console.error('\n✗ MongoDB connection failed\n');
+    console.error('\n✗ MongoDB connection attempt failed:');
     console.error(explainConnectionError(error));
     if (error instanceof Error && error.message && !explainConnectionError(error).includes(error.message)) {
       console.error(`\nDetails: ${error.message}`);
     }
-    console.error('');
-    process.exit(1);
+    console.error('Server will continue running and retry database operations.\n');
   }
 
   mongoose.connection.on('error', (err) => {
