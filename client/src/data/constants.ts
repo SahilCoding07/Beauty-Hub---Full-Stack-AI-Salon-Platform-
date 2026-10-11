@@ -26,6 +26,11 @@ import new_makeup from '../assets/new_makeup.png';
 import new_skincare from '../assets/new_skincare.png';
 import new_bridal_package from '../assets/new_bridal_package.jpg';
 import new_bridal_makeup from '../assets/new_bridal_makeup.png';
+import real_pearl_nails from '../assets/real_work/real_pearl_nails.png';
+import real_red_bridal from '../assets/real_work/real_red_bridal.png';
+import real_threading_waxing from '../assets/real_work/real_threading_waxing.png';
+import real_engagement_makeup from '../assets/real_work/real_engagement_makeup.png';
+import real_floral_nails from '../assets/real_work/real_floral_nails.png';
 
 export const SALON = {
   name: 'Beauty Hub Salon And Academy',
@@ -94,17 +99,22 @@ export const DEFAULT_STAFF = [
 
 export const IMAGES = {
   hero: salon1,
-  heroShowcase: bridal,
+  heroShowcase: real_red_bridal,
+  real_pearl_nails,
+  real_red_bridal,
+  real_threading_waxing,
+  real_engagement_makeup,
+  real_floral_nails,
   salon1,
   salon2,
   salon3,
   salon4,
-  nails,
+  nails: real_floral_nails,
+  nails2: real_pearl_nails,
   hair,
-  bridal,
-  party1,
-  bridal2,
-  nails2,
+  bridal: real_red_bridal,
+  party1: real_engagement_makeup,
+  bridal2: real_engagement_makeup,
   hair2,
   before1,
   before2,
@@ -114,13 +124,23 @@ export const IMAGES = {
   before4,
   after4,
   mani_pedi,
-  waxing,
-  threading,
+  waxing: real_threading_waxing,
+  threading: real_threading_waxing,
   facial,
   massage,
   new_hair_styling,
-  new_makeup,
+  new_makeup: real_engagement_makeup,
   new_skincare,
-  new_bridal_package,
-  new_bridal_makeup,
+  new_bridal_package: real_red_bridal,
+  new_bridal_makeup: real_red_bridal,
+  legacyNails: nails,
+  legacyBridal: bridal,
+  legacyParty1: party1,
+  legacyBridal2: bridal2,
+  legacyNails2: nails2,
+  legacyWaxing: waxing,
+  legacyThreading: threading,
+  legacyNewMakeup: new_makeup,
+  legacyNewBridalPackage: new_bridal_package,
+  legacyNewBridalMakeup: new_bridal_makeup,
 };

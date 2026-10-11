@@ -7,13 +7,14 @@ import { SALON, IMAGES } from '../../data/constants';
 import type { GalleryItem } from '../../types';
 
 const defaultGallery: GalleryItem[] = [
-  { _id: '1', title: 'Signature Bridal', category: 'Bridal', image: IMAGES.bridal, type: 'image' },
-  { _id: '2', title: 'Mocha Highlights', category: 'Hair', image: IMAGES.hair, type: 'image' },
-  { _id: '3', title: 'Gel Extensions', category: 'Nails', image: IMAGES.nails, type: 'image' },
-  { _id: '4', title: 'Classic Bridal', category: 'Bridal', image: IMAGES.bridal2, type: 'image' },
-  { _id: '5', title: 'Party Styling', category: 'Party', image: IMAGES.party1, type: 'image' },
-  { _id: '6', title: 'Pearl Nail Art', category: 'Nails', image: IMAGES.nails2, type: 'image' },
-  { _id: '7', title: 'Wavy Texture', category: 'Hair', image: IMAGES.hair2, type: 'image' },
+  { _id: '1', title: 'Signature Bridal Makeover', category: 'Bridal', image: IMAGES.real_red_bridal, type: 'image' },
+  { _id: '2', title: 'Glam Engagement Look', category: 'Engagement', image: IMAGES.real_engagement_makeup, type: 'image' },
+  { _id: '3', title: 'Luxury 3D Floral Nail Art', category: 'Nails', image: IMAGES.real_floral_nails, type: 'image' },
+  { _id: '4', title: 'Pearl & Rhinestone Extensions', category: 'Nails', image: IMAGES.real_pearl_nails, type: 'image' },
+  { _id: '5', title: 'Precision Threading & Waxing', category: 'Skin & Body', image: IMAGES.real_threading_waxing, type: 'image' },
+  { _id: '6', title: 'Mocha Hair Highlights', category: 'Hair', image: IMAGES.hair, type: 'image' },
+  { _id: '7', title: 'Party Glam Makeup', category: 'Party', image: IMAGES.party1, type: 'image' },
+  { _id: '8', title: 'Textured Waves & Styling', category: 'Hair', image: IMAGES.hair2, type: 'image' },
 ];
 
 const dedupeGallery = (list: GalleryItem[]): GalleryItem[] => {

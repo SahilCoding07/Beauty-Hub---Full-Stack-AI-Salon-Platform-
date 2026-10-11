@@ -32,7 +32,7 @@ const SHOWCASE_TABS = [
     tag: 'Signature Bridal Artistry',
     title: 'HD & Airbrush Bridal Makeovers',
     description: 'Complete luxury bridal packages with bespoke hair, HD makeup, draping & styling.',
-    image: IMAGES.salon4,
+    image: IMAGES.real_red_bridal,
     badge: 'Luxury Suite',
     perks: [
       'Personalized pre-bridal skin therapy',
