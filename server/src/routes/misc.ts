@@ -49,4 +49,39 @@ router.get('/admin/stats', authMiddleware, async (_req, res) => {
   }
 });
 
+// Cloud collection sync endpoints for mockDb
+router.get('/db/:collection', async (req, res) => {
+  try {
+    const { collection } = req.params;
+    const db = (Settings.db as any);
+    if (!db) return res.json([]);
+    const doc = await db.collection(collection).findOne({ _id: 'array_store' as any });
+    if (doc && Array.isArray((doc as any).data)) {
+      return res.json((doc as any).data);
+    }
+    return res.json([]);
+  } catch (err) {
+    console.error('MongoDB GET Error:', err);
+    res.json([]);
+  }
+});
+
+router.post('/db/:collection', async (req, res) => {
+  try {
+    const { collection } = req.params;
+    const db = (Settings.db as any);
+    if (!db) return res.status(503).json({ success: false, error: 'Database not connected' });
+    const data = req.body;
+    await db.collection(collection).updateOne(
+      { _id: 'array_store' as any },
+      { $set: { data } },
+      { upsert: true }
+    );
+    res.json({ success: true });
+  } catch (err) {
+    console.error('MongoDB POST Error:', err);
+    res.status(500).json({ success: false });
+  }
+});
+
 export default router;

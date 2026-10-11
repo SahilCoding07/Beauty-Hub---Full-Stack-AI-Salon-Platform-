@@ -16,13 +16,27 @@ const defaultGallery: GalleryItem[] = [
   { _id: '7', title: 'Wavy Texture', category: 'Hair', image: IMAGES.hair2, type: 'image' },
 ];
 
+const dedupeGallery = (list: GalleryItem[]): GalleryItem[] => {
+  const seen = new Set<string>();
+  return list.filter((item) => {
+    const key = `${item.title || ''}-${item.image || ''}`.toLowerCase().trim();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+};
+
 export default function Gallery() {
-  const [items, setItems] = useState<GalleryItem[]>(defaultGallery);
+  const [items, setItems] = useState<GalleryItem[]>(() => dedupeGallery(defaultGallery));
   const [selectedImage, setSelectedImage] = useState<GalleryItem | null>(null);
 
   useEffect(() => {
     getGallery()
-      .then(({ data }) => { if (data.length) setItems(data); })
+      .then(({ data }) => {
+        if (data && data.length) {
+          setItems(dedupeGallery(data));
+        }
+      })
       .catch(() => {});
   }, []);
 

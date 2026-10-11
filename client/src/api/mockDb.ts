@@ -1,24 +1,46 @@
 
 
 import { DEFAULT_SERVICES } from '../data/constants';
+import { getApiBaseUrl } from './config';
 
-const BASE_URL = import.meta.env.VITE_API_URL || '';
+const getDbEndpoint = (collection: string) => {
+  const baseUrl = getApiBaseUrl().replace(/\/api$/, '');
+  return `${baseUrl}/api/db/${collection}`;
+};
 
 export const mockDb = {
   get: async (collection: string): Promise<any[]> => {
     try {
-      const res = await fetch(`${BASE_URL}/api/db/${collection}`);
-
-      const data = await res.json();
-      return Array.isArray(data) ? data : [];
+      const url = getDbEndpoint(collection);
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          try { localStorage.setItem(`beauty_hub_cache_${collection}`, JSON.stringify(data)); } catch {}
+          return data;
+        }
+      }
     } catch (e) {
-      console.error('MongoDB Get Error', e);
-      return [];
+      console.warn('Remote DB fetch error, checking local cache:', e);
     }
+
+    // Fallback to local cache if offline or server is waking up
+    try {
+      const cached = localStorage.getItem(`beauty_hub_cache_${collection}`);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+
+    return [];
   },
   set: async (collection: string, data: any): Promise<boolean> => {
+    try { localStorage.setItem(`beauty_hub_cache_${collection}`, JSON.stringify(data)); } catch {}
+
     try {
-      await fetch(`${BASE_URL}/api/db/${collection}`, {
+      const url = getDbEndpoint(collection);
+      await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
