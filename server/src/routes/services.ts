@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import multer from 'multer';
+import fs from 'fs';
 import path from 'path';
 import { Service } from '../models/index.js';
 import { authMiddleware } from '../middleware/auth.js';
@@ -34,9 +35,19 @@ router.get('/', async (req, res) => {
 router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
   try {
     const { name, category, description, duration, price, discount } = req.body;
-    const image = req.file
-      ? `/uploads/${req.file.filename}`
-      : categoryImages[category] || categoryImages.Hair;
+    let image = req.body.image || categoryImages[category] || categoryImages.Hair;
+
+    if (req.file) {
+      try {
+        const fileBuffer = fs.readFileSync(req.file.path);
+        const mime = req.file.mimetype || 'image/jpeg';
+        image = `data:${mime};base64,${fileBuffer.toString('base64')}`;
+        fs.unlinkSync(req.file.path);
+      } catch (e) {
+        console.error('File read error:', e);
+        image = `/uploads/${req.file.filename}`;
+      }
+    }
 
     const service = await Service.create({
       name, category, description: description || '',
@@ -52,7 +63,19 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
 router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
   try {
     const updates = { ...req.body };
-    if (req.file) updates.image = `/uploads/${req.file.filename}`;
+
+    if (req.file) {
+      try {
+        const fileBuffer = fs.readFileSync(req.file.path);
+        const mime = req.file.mimetype || 'image/jpeg';
+        updates.image = `data:${mime};base64,${fileBuffer.toString('base64')}`;
+        fs.unlinkSync(req.file.path);
+      } catch (e) {
+        console.error('File read error:', e);
+        updates.image = `/uploads/${req.file.filename}`;
+      }
+    }
+
     if (updates.price) updates.price = Number(updates.price);
     if (updates.duration) updates.duration = Number(updates.duration);
     if (updates.discount) updates.discount = Number(updates.discount);
