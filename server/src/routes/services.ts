@@ -6,7 +6,13 @@ import { Service } from '../models/index.js';
 import { authMiddleware } from '../middleware/auth.js';
 
 const router = Router();
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({
+  dest: 'uploads/',
+  limits: {
+    fieldSize: 25 * 1024 * 1024, // 25MB to accommodate phone photo base64 strings
+    fileSize: 25 * 1024 * 1024,
+  },
+});
 
 const categoryImages: Record<string, string> = {
   Hair: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80',

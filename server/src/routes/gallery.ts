@@ -5,7 +5,13 @@ import { Gallery } from '../models/index.js';
 import { authMiddleware } from '../middleware/auth.js';
 
 const router = Router();
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({
+  dest: 'uploads/',
+  limits: {
+    fieldSize: 25 * 1024 * 1024,
+    fileSize: 25 * 1024 * 1024,
+  },
+});
 
 router.get('/', async (req, res) => {
   try {
