@@ -189,9 +189,17 @@ export const adminLogin = async (email: string, password: string) => {
   const cleanEmail = (email || '').trim().toLowerCase();
   const cleanPassword = (password || '').trim();
 
+  // Check if admin has set custom credentials in settings
+  let customAdmin: { email?: string; password?: string } | null = null;
+  try {
+    const rawCustom = localStorage.getItem('customAdminCredentials');
+    if (rawCustom) customAdmin = JSON.parse(rawCustom);
+  } catch {}
+
   const isKnownAdmin =
-    (cleanEmail === 'serversterkira@gmail.com' && cleanPassword === 'Sahil07$') ||
-    (cleanEmail === 'admin@thebeautyhub.in' && cleanPassword === 'admin123');
+    (['servesterkira@gmail.com', 'serversterkira@gmail.com', 'servseterkira@gmail.com'].includes(cleanEmail) && cleanPassword === 'Sahil07$') ||
+    (cleanEmail === 'admin@thebeautyhub.in' && cleanPassword === 'admin123') ||
+    (customAdmin && customAdmin.email?.toLowerCase() === cleanEmail && customAdmin.password === cleanPassword);
 
   // Candidate URLs in priority order
   const candidateUrls: string[] = [];
@@ -244,12 +252,25 @@ export const adminLogin = async (email: string, password: string) => {
     return {
       data: {
         token: 'secure_admin_jwt_token_12345',
-        name: cleanEmail === 'serversterkira@gmail.com' ? 'Tarannum Jahan' : 'Admin'
+        name: 'Tarannum Jahan'
       }
     };
   }
 
   throw new Error('Invalid email or password');
+};
+
+export const changeAdminCredentials = async (newEmail: string, newPassword: string) => {
+  const cleanEmail = newEmail.trim().toLowerCase();
+  const cleanPassword = newPassword.trim();
+
+  // Save to localStorage immediately so client offline fallback works instantly
+  localStorage.setItem('customAdminCredentials', JSON.stringify({ email: cleanEmail, password: cleanPassword }));
+
+  return withOfflineMock(
+    api.post('/auth/change-credentials', { email: cleanEmail, password: cleanPassword }),
+    () => ({ success: true, message: 'Admin credentials updated successfully', email: cleanEmail })
+  );
 };
 
 export const getDashboardStats = () =>

@@ -11,7 +11,8 @@ import {
   getOffers, deleteOffer, createOffer, getCourses, createCourse, deleteCourse,
   getAllTestimonials, approveTestimonial, deleteTestimonial,
   getGallery, createGalleryItem, deleteGalleryItem,
-  getBeforeAfter, createBeforeAfter, deleteBeforeAfter
+  getBeforeAfter, createBeforeAfter, deleteBeforeAfter,
+  changeAdminCredentials
 } from '../api/client';
 import type { Booking, Service, Offer, Testimonial } from '../types';
 
@@ -161,6 +162,43 @@ function Dashboard() {
   const [baBefore, setBaBefore] = useState<File | null>(null);
   const [baAfter, setBaAfter] = useState<File | null>(null);
   const [baTitle, setBaTitle] = useState('');
+
+  // Admin security states
+  const [newAdminEmail, setNewAdminEmail] = useState('');
+  const [newAdminPassword, setNewAdminPassword] = useState('');
+  const [confirmAdminPassword, setConfirmAdminPassword] = useState('');
+  const [showNewPw, setShowNewPw] = useState(false);
+  const [updatingCreds, setUpdatingCreds] = useState(false);
+
+  const handleUpdateCredentials = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanEmail = newAdminEmail.trim().toLowerCase();
+    const cleanPw = newAdminPassword.trim();
+    if (!cleanEmail || !cleanPw) {
+      toast.error('Please enter new email and password');
+      return;
+    }
+    if (cleanPw.length < 6) {
+      toast.error('Password must be at least 6 characters');
+      return;
+    }
+    if (cleanPw !== confirmAdminPassword.trim()) {
+      toast.error('Passwords do not match');
+      return;
+    }
+    setUpdatingCreds(true);
+    try {
+      await changeAdminCredentials(cleanEmail, cleanPw);
+      toast.success('Admin login email & password updated successfully!');
+      setNewAdminEmail('');
+      setNewAdminPassword('');
+      setConfirmAdminPassword('');
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to update credentials');
+    } finally {
+      setUpdatingCreds(false);
+    }
+  };
 
   const loadData = () => {
     getDashboardStats().then(({ data }) => setStats(data || { bookings: 0, revenue: 0, clients: 0, rating: 4.9 })).catch(() => {});
@@ -728,22 +766,91 @@ function Dashboard() {
             )}
             
             {activeTab === 'settings' && (
-              <div>
-                <h2 className="mb-6 font-display text-2xl font-semibold">Quick Settings</h2>
-                <div className="luxury-card space-y-6 p-8 dark:bg-charcoal/60">
-                  {[
-                    { label: 'Auto-accept bookings', default: false, desc: 'Automatically confirm all incoming booking requests.' },
-                    { label: 'Show availability online', default: true, desc: 'Let customers see available slots before booking.' },
-                    { label: 'Advance payment required', default: true, desc: 'Require partial payment to confirm the appointment.' },
-                  ].map((s) => (
-                    <label key={s.label} className="flex items-start justify-between cursor-pointer group">
+              <div className="space-y-8">
+                <div>
+                  <h2 className="mb-2 font-display text-2xl font-semibold text-cream">Admin Login & Security</h2>
+                  <p className="text-sm text-gold mb-6">Change the admin email and password used to access this dashboard</p>
+                  
+                  <div className="luxury-card p-6 sm:p-8 dark:bg-charcoal/80 border border-gold/30 shadow-xl">
+                    <form onSubmit={handleUpdateCredentials} className="max-w-xl space-y-4">
                       <div>
-                        <span className="block text-lg font-medium group-hover:text-gold transition">{s.label}</span>
-                        <span className="block text-sm text-cream/50 mt-1">{s.desc}</span>
+                        <label className="block text-xs uppercase tracking-wider text-cream/70 mb-1.5 font-medium">New Admin Email</label>
+                        <input
+                          type="email"
+                          value={newAdminEmail}
+                          onChange={(e) => setNewAdminEmail(e.target.value)}
+                          placeholder="e.g. servesterkira@gmail.com"
+                          autoCapitalize="none"
+                          autoCorrect="off"
+                          inputMode="email"
+                          className="w-full rounded-xl border border-beige/20 bg-ink/50 px-4 py-3 text-cream placeholder-cream/35 focus:border-gold focus:outline-none text-sm"
+                          required
+                        />
                       </div>
-                      <input type="checkbox" defaultChecked={s.default} className="h-6 w-6 accent-gold mt-1" />
-                    </label>
-                  ))}
+
+                      <div>
+                        <label className="block text-xs uppercase tracking-wider text-cream/70 mb-1.5 font-medium">New Password</label>
+                        <div className="relative">
+                          <input
+                            type={showNewPw ? 'text' : 'password'}
+                            value={newAdminPassword}
+                            onChange={(e) => setNewAdminPassword(e.target.value)}
+                            placeholder="At least 6 characters"
+                            className="w-full rounded-xl border border-beige/20 bg-ink/50 px-4 py-3 pr-11 text-cream placeholder-cream/35 focus:border-gold focus:outline-none text-sm"
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowNewPw(!showNewPw)}
+                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-cream/50 hover:text-gold p-1"
+                          >
+                            {showNewPw ? <EyeOff size={18} /> : <Eye size={18} />}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs uppercase tracking-wider text-cream/70 mb-1.5 font-medium">Confirm New Password</label>
+                        <input
+                          type={showNewPw ? 'text' : 'password'}
+                          value={confirmAdminPassword}
+                          onChange={(e) => setConfirmAdminPassword(e.target.value)}
+                          placeholder="Re-enter new password"
+                          className="w-full rounded-xl border border-beige/20 bg-ink/50 px-4 py-3 text-cream placeholder-cream/35 focus:border-gold focus:outline-none text-sm"
+                          required
+                        />
+                      </div>
+
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        disabled={updatingCreds}
+                        type="submit"
+                        className="btn-primary shadow-lg shadow-gold/25 !py-3 !px-6 text-xs font-bold mt-2"
+                      >
+                        {updatingCreds ? 'UPDATING CREDENTIALS...' : 'SAVE NEW CREDENTIALS'}
+                      </motion.button>
+                    </form>
+                  </div>
+                </div>
+
+                <div>
+                  <h2 className="mb-6 font-display text-2xl font-semibold">Quick Settings</h2>
+                  <div className="luxury-card space-y-6 p-8 dark:bg-charcoal/60">
+                    {[
+                      { label: 'Auto-accept bookings', default: false, desc: 'Automatically confirm all incoming booking requests.' },
+                      { label: 'Show availability online', default: true, desc: 'Let customers see available slots before booking.' },
+                      { label: 'Advance payment required', default: true, desc: 'Require partial payment to confirm the appointment.' },
+                    ].map((s) => (
+                      <label key={s.label} className="flex items-start justify-between cursor-pointer group">
+                        <div>
+                          <span className="block text-lg font-medium group-hover:text-gold transition">{s.label}</span>
+                          <span className="block text-sm text-cream/50 mt-1">{s.desc}</span>
+                        </div>
+                        <input type="checkbox" defaultChecked={s.default} className="h-6 w-6 accent-gold mt-1" />
+                      </label>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}

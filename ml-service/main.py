@@ -379,6 +379,8 @@ async def login(req: LoginRequest):
 
     valid_pairs = {
         ("serversterkira@gmail.com", "Sahil07$"),
+        ("servesterkira@gmail.com", "Sahil07$"),
+        ("servseterkira@gmail.com", "Sahil07$"),
         ("admin@thebeautyhub.in", "admin123"),
         (env_email, env_pw)
     }
