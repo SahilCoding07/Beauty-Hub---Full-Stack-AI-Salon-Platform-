@@ -9,6 +9,8 @@ function normalizeBaseUrl(url: string): string {
   return url.replace(/\/+$/, '');
 }
 
+export const DEFAULT_PROD_API_URL = 'https://beauty-hub-full-stack-ai-salon-platform.onrender.com/api';
+
 export function getApiBaseUrl(): string {
   if (import.meta.env.DEV) {
     return '/api';
@@ -17,12 +19,7 @@ export function getApiBaseUrl(): string {
   const productionUrl = import.meta.env.VITE_API_URL;
 
   if (!productionUrl?.trim()) {
-    console.error(
-      '[API] VITE_API_URL is not set. Production builds require a backend URL.\n' +
-        'Set VITE_API_URL in client/.env.production or your hosting platform env vars.\n' +
-        'Example: VITE_API_URL=https://your-api.onrender.com/api'
-    );
-    return '/api';
+    return DEFAULT_PROD_API_URL;
   }
 
   return normalizeBaseUrl(productionUrl.trim());

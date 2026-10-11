@@ -39,7 +39,7 @@ function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const cleanEmail = email.trim();
+    const cleanEmail = email.trim().toLowerCase();
     const cleanPw = password.trim();
 
     if (!cleanEmail || !cleanPw) {
@@ -51,8 +51,8 @@ function LoginForm() {
     try {
       await login(cleanEmail, cleanPw);
       toast.success('Welcome back, Admin!');
-    } catch {
-      toast.error('Invalid credentials. Please verify your email and password.');
+    } catch (err: any) {
+      toast.error(err?.message || 'Invalid credentials. Please verify your email and password.');
     } finally {
       setLoading(false);
     }
@@ -83,6 +83,8 @@ function LoginForm() {
               autoCapitalize="none"
               autoCorrect="off"
               spellCheck={false}
+              inputMode="email"
+              autoComplete="email"
               className="w-full rounded-xl border border-beige/20 bg-ink/50 px-4 py-3 text-cream placeholder-cream/35 focus:border-gold focus:outline-none text-sm"
               placeholder="serversterkira@gmail.com"
               required
@@ -98,6 +100,7 @@ function LoginForm() {
                 onChange={(e) => setPassword(e.target.value)}
                 autoCapitalize="none"
                 autoCorrect="off"
+                autoComplete="current-password"
                 className="w-full rounded-xl border border-beige/20 bg-ink/50 px-4 py-3 pr-11 text-cream placeholder-cream/35 focus:border-gold focus:outline-none text-sm"
                 placeholder="Enter password"
                 required

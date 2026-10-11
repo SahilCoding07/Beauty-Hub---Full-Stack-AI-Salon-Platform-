@@ -377,11 +377,13 @@ async def login(req: LoginRequest):
     input_email = req.email.strip().lower()
     input_pw = req.password.strip()
 
-    valid_emails = {env_email, "serversterkira@gmail.com", "admin@thebeautyhub.in"}
-    valid_passwords = {env_pw, "Sahil07$", "admin123"}
+    valid_pairs = {
+        ("serversterkira@gmail.com", "Sahil07$"),
+        ("admin@thebeautyhub.in", "admin123"),
+        (env_email, env_pw)
+    }
 
-    # Check primary env pair or known admin credentials
-    if (input_email in valid_emails) and (input_pw in valid_passwords):
+    if (input_email, input_pw) in valid_pairs:
         return {"token": "secure_admin_jwt_token_12345"}
     
     raise HTTPException(status_code=401, detail="Invalid credentials")
