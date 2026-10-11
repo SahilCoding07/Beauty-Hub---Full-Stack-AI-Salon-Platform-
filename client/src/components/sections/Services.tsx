@@ -7,7 +7,7 @@ import type { Service } from '../../types';
 
 const categoryImages: Record<string, string> = {
   Hair: IMAGES.hair,
-  'Party Makeup': IMAGES.real_engagement_makeup,
+  'Party Makeup': IMAGES.party1,
   'Engagement Makeup': IMAGES.real_engagement_makeup,
   'Bridal Makeup': IMAGES.real_red_bridal,
   Nails: IMAGES.real_floral_nails,
@@ -16,34 +16,35 @@ const categoryImages: Record<string, string> = {
 
 const serviceImages: Record<string, string> = {
   'Hair Styling': IMAGES.new_hair_styling,
-  'Party Makeup (Normal)': IMAGES.real_engagement_makeup,
-  'Party Makeup (HD)': IMAGES.party1,
-  'Party Makeup (Silicone)': IMAGES.real_engagement_makeup,
-  'Engagement Makeup (Normal)': IMAGES.real_engagement_makeup,
-  'Engagement Makeup (HD)': IMAGES.real_engagement_makeup,
-  'Engagement Makeup (Silicone)': IMAGES.real_engagement_makeup,
-  'Bridal & Reception (Normal)': IMAGES.real_red_bridal,
-  'Bridal & Reception (HD)': IMAGES.real_red_bridal,
-  'Bridal & Reception (Silicone)': IMAGES.real_red_bridal,
   'Hair Spa': IMAGES.salon2,
+  'Hair Chemical Work': IMAGES.hair2,
   'Hair Coloring': IMAGES.hair,
-  'Makeup': IMAGES.real_engagement_makeup,
+  'Party Makeup (Normal)': IMAGES.party1,
+  'Party Makeup (HD)': IMAGES.new_makeup,
+  'Party Makeup (Silicone)': IMAGES.real_engagement_makeup,
+  'Engagement Makeup (Normal)': IMAGES.bridal2,
+  'Engagement Makeup (HD)': IMAGES.real_engagement_makeup,
+  'Engagement Makeup (Silicone)': IMAGES.new_bridal_makeup,
+  'Bridal & Reception (Normal)': IMAGES.bridal,
+  'Bridal & Reception (HD)': IMAGES.new_bridal_package,
+  'Bridal & Reception (Silicone)': IMAGES.real_red_bridal,
   'Bridal Makeup': IMAGES.real_red_bridal,
+  'Makeup': IMAGES.real_engagement_makeup,
   'Nail Art': IMAGES.real_floral_nails,
   'Nail Extensions (Both Hands)': IMAGES.real_pearl_nails,
-  'Nail Extensions': IMAGES.real_pearl_nails,
+  'Nail Extensions': IMAGES.nails2,
   'Manicure & Pedicure': IMAGES.mani_pedi,
-  'Manicure': IMAGES.mani_pedi,
+  'Manicure': IMAGES.nails,
   'Pedicure': IMAGES.mani_pedi,
-  'Waxing': IMAGES.real_threading_waxing,
-  'Threading & Waxing': IMAGES.real_threading_waxing,
-  'Facial': IMAGES.facial,
   'Skin Treatment': IMAGES.new_skincare,
   'Skin Care': IMAGES.new_skincare,
-  'Threading': IMAGES.real_threading_waxing,
+  'Facial': IMAGES.facial,
+  'Threading & Waxing': IMAGES.real_threading_waxing,
+  'Waxing': IMAGES.waxing,
+  'Threading': IMAGES.threading,
   'Massage': IMAGES.massage,
-  'Party Package': IMAGES.real_engagement_makeup,
-  'Bridal Package': IMAGES.real_red_bridal,
+  'Party Package': IMAGES.party1,
+  'Bridal Package': IMAGES.new_bridal_package,
 };
 
 export default function Services() {
@@ -54,8 +55,20 @@ export default function Services() {
   useEffect(() => {
     getServices(activeCategory === 'All' ? undefined : activeCategory)
       .then(({ data }) => {
-        if (data && data.length > 0) setServices(data);
-        else throw new Error('Empty');
+        if (data && data.length > 0) {
+          const sanitized = data.map((s: Service) => {
+            const isUnsplash = !s.image || s.image.includes('unsplash.com');
+            return {
+              ...s,
+              image: isUnsplash
+                ? (serviceImages[s.name] || categoryImages[s.category] || IMAGES.hair)
+                : s.image,
+            };
+          });
+          setServices(sanitized);
+        } else {
+          throw new Error('Empty');
+        }
       })
       .catch(() => {
         setServices(
@@ -63,7 +76,7 @@ export default function Services() {
             _id: String(i),
             ...s,
             category: s.category as Service['category'],
-            image: serviceImages[s.name] || categoryImages[s.category] || categoryImages.Hair,
+            image: serviceImages[s.name] || categoryImages[s.category] || IMAGES.hair,
             isActive: true,
           }))
         );

@@ -78,7 +78,9 @@ export default function Footer() {
 
         <div className="mt-12 border-t border-charcoal/10 dark:border-gold/10 pt-8 text-center text-sm text-charcoal/40 dark:text-cream/40">
           <p>© {new Date().getFullYear()} {SALON.name}. All rights reserved.</p>
-          <p className="mt-1">Crafted with ✦ elegance & passion | Developed by Sahil</p>
+          <p className="mt-2 text-xs sm:text-sm text-charcoal/60 dark:text-cream/60">
+            Crafted with <span className="text-gold">✦</span> elegance & passion | Designed & Developed by <span className="text-gold font-semibold tracking-wide">Sahil Raza</span>
+          </p>
         </div>
       </div>
     </footer>

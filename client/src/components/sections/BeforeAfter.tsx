@@ -70,8 +70,13 @@ export default function BeforeAfter() {
 
   useEffect(() => {
     getBeforeAfter().then(({ data }) => {
-      if (data && data.length > 0) {
-        setTransformations(data);
+      if (data && Array.isArray(data) && data.length > 0) {
+        const validCustom = data.filter(
+          (d: any) => d.before && d.after && !d.before.includes('unsplash.com') && !d.after.includes('unsplash.com')
+        );
+        if (validCustom.length > 0) {
+          setTransformations([...validCustom, ...defaultTransformations]);
+        }
       }
     }).catch(() => {});
   }, []);

@@ -26,6 +26,14 @@ const services = [
 ];
 
 export async function seedIfEmpty() {
+  try {
+    // Purge any legacy unsplash demo links from MongoDB
+    await Gallery.deleteMany({ image: { $regex: 'unsplash\\.com' } });
+    await Service.deleteMany({ image: { $regex: 'unsplash\\.com' } });
+  } catch (e) {
+    console.warn('Cleanup notice:', e);
+  }
+
   const count = await Service.countDocuments();
   if (count > 0) return;
 
@@ -46,12 +54,6 @@ export async function seedIfEmpty() {
     { name: 'Ananya Singh', rating: 5, review: "My bridal makeup was absolutely stunning! Tarannum ma'am understood exactly what I wanted.", service: 'Bridal Makeup', isApproved: true },
     { name: 'Riya Patel', rating: 5, review: 'Best salon in Rampur! Professional, hygienic, and luxurious experience every time.', service: 'Hair Coloring', isApproved: true },
     { name: 'Meera Joshi', rating: 5, review: 'The academy course changed my career. Highly recommend!', service: 'Academy Course', isApproved: true },
-  ]);
-  await Gallery.insertMany([
-    { title: 'Bridal Makeup', category: 'Makeup', image: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&q=80', type: 'image' },
-    { title: 'Hair Styling', category: 'Hair', image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?w=600&q=80', type: 'image' },
-    { title: 'Nail Art', category: 'Nails', image: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=600&q=80', type: 'image' },
-    { title: 'Makeup', category: 'Makeup', image: 'https://images.unsplash.com/photo-1487412949317-9a1e063e613a?w=600&q=80', type: 'image' },
   ]);
 
   const adminExists = await Admin.findOne();

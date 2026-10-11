@@ -18,11 +18,17 @@ const defaultGallery: GalleryItem[] = [
 ];
 
 const dedupeGallery = (list: GalleryItem[]): GalleryItem[] => {
-  const seen = new Set<string>();
+  const seenImages = new Set<string>();
+  const seenTitles = new Set<string>();
   return list.filter((item) => {
-    const key = `${item.title || ''}-${item.image || ''}`.toLowerCase().trim();
-    if (seen.has(key)) return false;
-    seen.add(key);
+    const img = (item.image || '').trim();
+    const title = (item.title || '').trim().toLowerCase();
+    if (!img) return false;
+    // Never allow old unsplash demo placeholders
+    if (img.includes('unsplash.com')) return false;
+    if (seenImages.has(img) || (title && seenTitles.has(title))) return false;
+    seenImages.add(img);
+    if (title) seenTitles.add(title);
     return true;
   });
 };
@@ -34,8 +40,14 @@ export default function Gallery() {
   useEffect(() => {
     getGallery()
       .then(({ data }) => {
-        if (data && data.length) {
-          setItems(dedupeGallery(data));
+        if (data && Array.isArray(data) && data.length > 0) {
+          const validCustomItems = data.filter(
+            (item: GalleryItem) => item.image && !item.image.includes('unsplash.com')
+          );
+          const combined = dedupeGallery([...validCustomItems, ...defaultGallery]);
+          if (combined.length > 0) {
+            setItems(combined);
+          }
         }
       })
       .catch(() => {});
