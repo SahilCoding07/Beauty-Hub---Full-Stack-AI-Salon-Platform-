@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, Upload, ExternalLink, X, HeartHandshake } from 'lucide-react';
 import toast from 'react-hot-toast';
+import CustomSelect from '../ui/CustomSelect';
 import { submitReview } from '../../api/client';
 
 export default function Reviews() {
@@ -95,17 +96,12 @@ export default function Reviews() {
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               className="w-full rounded-xl border border-charcoal/10 dark:border-beige/30 bg-white/50 px-4 py-3 text-charcoal dark:bg-ink/30 dark:text-cream focus:border-gold focus:outline-none"
             />
-            <select
-              required
+            <CustomSelect
               value={form.service}
-              onChange={(e) => setForm({ ...form, service: e.target.value })}
-              className="w-full rounded-xl border border-charcoal/10 dark:border-beige/30 bg-white/50 px-4 py-3 text-charcoal dark:bg-ink/30 dark:text-cream focus:border-gold focus:outline-none"
-            >
-              <option value="">Select Service</option>
-              {['Hair Styling', 'Makeup', 'Nails', 'Facial', 'Bridal Package', 'Other'].map((s) => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
+              onChange={(val) => setForm({ ...form, service: val })}
+              placeholder="Select Service"
+              options={['Hair Styling', 'Makeup', 'Nails', 'Facial', 'Bridal Package', 'Other']}
+            />
             <textarea
               required
               rows={4}

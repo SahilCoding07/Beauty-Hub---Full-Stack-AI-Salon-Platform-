@@ -1,9 +1,13 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Phone, Mail, Clock } from 'lucide-react';
 import { InstagramIcon } from '../ui/InstagramIcon';
+import CustomSelect from '../ui/CustomSelect';
 import { SALON } from '../../data/constants';
 
 export default function Contact() {
+  const [subject, setSubject] = useState('General Inquiry');
+
   return (
     <section id="contact" className="section-padding bg-beige dark:bg-ink text-charcoal dark:text-cream transition-colors duration-500">
       <div className="mx-auto max-w-7xl">
@@ -57,22 +61,23 @@ export default function Contact() {
                 const data = new FormData(form);
                 const name = data.get('name');
                 const email = data.get('email');
-                const subject = data.get('subject');
+                const formSubject = data.get('subject') || subject;
                 const message = data.get('message');
-                const text = `Hi, my name is ${name} (${email}).\nQuery Type: ${subject}\n\nMessage: ${message}`;
+                const text = `Hi, my name is ${name} (${email}).\nQuery Type: ${formSubject}\n\nMessage: ${message}`;
                 window.open(`https://wa.me/918171537593?text=${encodeURIComponent(text)}`, '_blank');
                 form.reset();
+                setSubject('General Inquiry');
               }}
               className="space-y-4"
             >
               <input name="name" required placeholder="Your Name" className="w-full rounded-xl border border-charcoal/10 dark:border-beige/20 bg-white/50 dark:bg-ink/50 px-4 py-3 text-charcoal dark:text-cream placeholder:text-charcoal/40 dark:placeholder:text-cream/40 focus:border-gold focus:outline-none" />
               <input name="email" type="email" required placeholder="Email Address" className="w-full rounded-xl border border-charcoal/10 dark:border-beige/20 bg-white/50 dark:bg-ink/50 px-4 py-3 text-charcoal dark:text-cream placeholder:text-charcoal/40 dark:placeholder:text-cream/40 focus:border-gold focus:outline-none" />
-              <select name="subject" className="w-full rounded-xl border border-charcoal/10 dark:border-beige/20 bg-white/50 dark:bg-ink/50 px-4 py-3 text-charcoal dark:text-cream focus:border-gold focus:outline-none">
-                <option value="General Inquiry">General Inquiry</option>
-                <option value="Booking Question">Booking Question</option>
-                <option value="Feedback">Feedback</option>
-                <option value="Partnership">Partnership</option>
-              </select>
+              <CustomSelect
+                name="subject"
+                value={subject}
+                onChange={setSubject}
+                options={['General Inquiry', 'Booking Question', 'Feedback', 'Partnership']}
+              />
               <textarea name="message" required rows={4} placeholder="Your message..." className="w-full rounded-xl border border-charcoal/10 dark:border-beige/20 bg-white/50 dark:bg-ink/50 px-4 py-3 text-charcoal dark:text-cream placeholder:text-charcoal/40 dark:placeholder:text-cream/40 focus:border-gold focus:outline-none resize-none" />
               <button type="submit" className="btn-primary w-full text-white dark:text-ink">Send Message</button>
             </form>

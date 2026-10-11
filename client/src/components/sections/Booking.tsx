@@ -11,6 +11,7 @@ import {
   
 } from '../../api/client';
 import { DEFAULT_SERVICES, DEFAULT_STAFF } from '../../data/constants';
+import CustomSelect from '../ui/CustomSelect';
 import type { Service, Staff } from '../../types';
 
 const STEPS = ['Service', 'Schedule', 'Details', 'Confirm'];
@@ -246,16 +247,15 @@ export default function Booking() {
               </div>
               <div>
                 <label className="mb-2 block text-sm text-charcoal/60 dark:text-cream/60">Preferred Stylist (Optional)</label>
-                <select
+                <CustomSelect
                   value={form.staffId}
-                  onChange={(e) => updateForm('staffId', e.target.value)}
-                  className="w-full rounded-xl border border-charcoal/10 dark:border-beige/20 bg-white/50 dark:bg-ink/50 px-4 py-3 text-charcoal dark:text-cream focus:border-gold focus:outline-none"
-                >
-                  <option value="">No Preference</option>
-                  {staff.map((s) => (
-                    <option key={s._id} value={s._id}>{s.name} - {s.role}</option>
-                  ))}
-                </select>
+                  onChange={(val) => updateForm('staffId', val)}
+                  placeholder="No Preference"
+                  options={[
+                    { value: '', label: 'No Preference' },
+                    ...staff.map((s) => ({ value: s._id, label: `${s.name} - ${s.role}` })),
+                  ]}
+                />
               </div>
               {form.date && (
                 <div>

@@ -79,6 +79,8 @@ const SHOWCASE_TABS = [
 export default function Hero() {
   const [activeTab, setActiveTab] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
 
   useEffect(() => {
     if (isPaused) return;
@@ -87,6 +89,32 @@ export default function Hero() {
     }, 5000);
     return () => clearInterval(interval);
   }, [isPaused]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    setIsPaused(true);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+
+    // Check if horizontal swipe is dominant and above 35px threshold
+    if (Math.abs(deltaX) > 35 && Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (deltaX < 0) {
+        // Swipe left -> next tab
+        setActiveTab((prev) => (prev + 1) % SHOWCASE_TABS.length);
+      } else {
+        // Swipe right -> previous tab
+        setActiveTab((prev) => (prev - 1 + SHOWCASE_TABS.length) % SHOWCASE_TABS.length);
+      }
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+    setTimeout(() => setIsPaused(false), 3000);
+  };
 
   const curr = SHOWCASE_TABS[activeTab];
 
@@ -203,7 +231,11 @@ export default function Hero() {
           <div className="absolute -inset-4 rounded-[2.5rem] bg-gradient-to-tr from-gold/25 via-gold/10 to-transparent blur-2xl opacity-60 pointer-events-none" />
 
           {/* Interactive Showcase Card */}
-          <div className="relative rounded-[2rem] border border-gold/30 bg-white/95 dark:bg-ink/95 p-4 sm:p-5 shadow-2xl backdrop-blur-xl flex flex-col justify-between transition-colors duration-500">
+          <div
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            className="relative rounded-[2rem] border border-gold/30 bg-white/95 dark:bg-ink/95 p-4 sm:p-5 shadow-2xl backdrop-blur-xl flex flex-col justify-between transition-colors duration-500 touch-pan-y"
+          >
             {/* Top: Tab Switcher */}
             <div className="flex rounded-full bg-cream/90 dark:bg-charcoal/90 p-1 border border-gold/20 backdrop-blur-md transition-colors duration-500">
               {SHOWCASE_TABS.map((tab, idx) => (
@@ -285,17 +317,22 @@ export default function Hero() {
               </a>
 
               {/* Slide Indicators */}
-              <div className="flex justify-center gap-1.5">
-                {SHOWCASE_TABS.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setActiveTab(i)}
-                    className={`h-1.5 rounded-full transition-all duration-300 ${
-                      activeTab === i ? 'w-6 bg-gold' : 'w-1.5 bg-charcoal/20 hover:bg-charcoal/40 dark:bg-cream/20 dark:hover:bg-cream/40'
-                    }`}
-                    aria-label={`Go to slide ${i + 1}`}
-                  />
-                ))}
+              <div className="flex flex-col items-center gap-1.5">
+                <div className="flex justify-center gap-1.5">
+                  {SHOWCASE_TABS.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setActiveTab(i)}
+                      className={`h-1.5 rounded-full transition-all duration-300 ${
+                        activeTab === i ? 'w-6 bg-gold' : 'w-1.5 bg-charcoal/20 hover:bg-charcoal/40 dark:bg-cream/20 dark:hover:bg-cream/40'
+                      }`}
+                      aria-label={`Go to slide ${i + 1}`}
+                    />
+                  ))}
+                </div>
+                <span className="text-[10px] text-gold/60 font-medium sm:hidden">
+                  ← Swipe to switch tabs →
+                </span>
               </div>
             </div>
           </div>

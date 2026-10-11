@@ -33,13 +33,13 @@ export default function Navbar() {
       transition={{ duration: 0.6 }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
-          ? 'bg-white/95 dark:bg-ink/95 backdrop-blur-xl shadow-lg shadow-black/5 dark:shadow-black/20 py-3'
-          : 'bg-transparent py-4'
+          ? 'bg-white/95 dark:bg-ink/95 backdrop-blur-xl shadow-lg shadow-black/5 dark:shadow-black/20 py-2 sm:py-3'
+          : 'bg-transparent py-2.5 sm:py-4'
       }`}
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <a href="#home" className="flex items-center gap-3.5 group">
-          <div className="relative flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-full ring-2 ring-gold/40 bg-white/80 dark:bg-ink/60 p-1 shadow-lg shadow-black/10 dark:shadow-black/40 transition-all duration-300 group-hover:ring-gold group-hover:scale-105">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-3 sm:px-6 lg:px-8">
+        <a href="#home" className="flex items-center gap-2.5 sm:gap-3.5 group">
+          <div className="relative flex h-9 w-9 sm:h-12 sm:w-12 lg:h-14 lg:w-14 shrink-0 items-center justify-center rounded-full ring-2 ring-gold/40 bg-white/80 dark:bg-ink/60 p-0.5 sm:p-1 shadow-md shadow-black/10 dark:shadow-black/40 transition-all duration-300 group-hover:ring-gold group-hover:scale-105">
             <img
               src={logoImage}
               alt={`${SALON.shortName} Logo`}
@@ -47,10 +47,10 @@ export default function Navbar() {
             />
           </div>
           <div className="flex flex-col">
-            <span className="font-display text-lg sm:text-xl font-bold tracking-wider text-charcoal dark:text-cream transition duration-300 group-hover:text-gold leading-tight">
+            <span className="font-display text-base sm:text-xl font-bold tracking-wider text-charcoal dark:text-cream transition duration-300 group-hover:text-gold leading-tight">
               {SALON.shortName}
             </span>
-            <span className="text-[10px] uppercase tracking-[0.25em] text-gold/80 font-medium">
+            <span className="hidden sm:inline-block text-[10px] uppercase tracking-[0.25em] text-gold/80 font-medium">
               Salon & Academy
             </span>
           </div>
