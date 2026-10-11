@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, GraduationCap, Calendar, Scissors, Tag, MessageSquare, Image, Settings, LogOut, IndianRupee, Users, Star,
-  Plus, Trash2, Menu, X, Edit, Check, Upload, Camera, Brain, AlertTriangle, TrendingUp
+  Plus, Trash2, Menu, X, Edit, Check, Upload, Camera, Brain, AlertTriangle, TrendingUp, Eye, EyeOff
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
@@ -32,18 +32,27 @@ const tabs = [
 
 function LoginForm() {
   const { login } = useAuth();
-  const [email, setEmail] = useState('admin@thebeautyhub.in');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const cleanEmail = email.trim();
+    const cleanPw = password.trim();
+
+    if (!cleanEmail || !cleanPw) {
+      toast.error('Please enter email and password');
+      return;
+    }
+
     setLoading(true);
     try {
-      await login(email, password);
+      await login(cleanEmail, cleanPw);
       toast.success('Welcome back, Admin!');
     } catch {
-      toast.error('Invalid credentials');
+      toast.error('Invalid credentials. Please verify your email and password.');
     } finally {
       setLoading(false);
     }
@@ -54,42 +63,65 @@ function LoginForm() {
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="w-full max-w-md luxury-card p-8 dark:bg-charcoal/80"
+        className="w-full max-w-md luxury-card p-6 sm:p-8 dark:bg-charcoal/90 border border-gold/30 shadow-2xl"
       >
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-gold/50 bg-gold/10 font-display text-3xl font-bold text-gold">
+        <div className="mb-6 sm:mb-8 text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full border border-gold/50 bg-gold/10 font-display text-2xl sm:text-3xl font-bold text-gold shadow-inner">
             B
           </div>
-          <h1 className="font-display text-2xl font-semibold text-cream">Admin Dashboard</h1>
-          <p className="text-sm text-gold">Manage your salon</p>
+          <h1 className="font-display text-2xl sm:text-3xl font-semibold text-cream">Admin Dashboard</h1>
+          <p className="text-xs sm:text-sm text-gold mt-1 font-medium">Manage your salon & academy</p>
         </div>
+
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-xl border border-beige/20 bg-ink/50 px-4 py-3 text-cream placeholder-cream/50 focus:border-gold focus:outline-none"
-            placeholder="Email Address"
-            required
-          />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-xl border border-beige/20 bg-ink/50 px-4 py-3 text-cream placeholder-cream/50 focus:border-gold focus:outline-none"
-            placeholder="Password"
-            required
-          />
+          <div>
+            <label className="block text-xs uppercase tracking-wider text-cream/70 mb-1.5 font-medium">Email Address</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              className="w-full rounded-xl border border-beige/20 bg-ink/50 px-4 py-3 text-cream placeholder-cream/35 focus:border-gold focus:outline-none text-sm"
+              placeholder="serversterkira@gmail.com"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs uppercase tracking-wider text-cream/70 mb-1.5 font-medium">Password</label>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoCapitalize="none"
+                autoCorrect="off"
+                className="w-full rounded-xl border border-beige/20 bg-ink/50 px-4 py-3 pr-11 text-cream placeholder-cream/35 focus:border-gold focus:outline-none text-sm"
+                placeholder="Enter password"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-cream/50 hover:text-gold transition-colors p-1"
+                aria-label="Toggle password visibility"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+          </div>
+
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             disabled={loading}
             type="submit"
-            className="btn-primary w-full shadow-lg shadow-gold/20"
+            className="btn-primary w-full shadow-lg shadow-gold/25 mt-2 !py-3.5 text-xs font-bold"
           >
-            {loading ? 'AUTHENTICATING...' : 'LOGIN'}
+            {loading ? 'AUTHENTICATING...' : 'LOGIN TO ADMIN'}
           </motion.button>
-          <p className="text-center text-xs text-cream/40">Default: admin@thebeautyhub.in / admin123</p>
         </form>
       </motion.div>
     </div>
