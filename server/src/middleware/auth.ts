@@ -11,7 +11,8 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
     return res.status(401).json({ error: 'Unauthorized' });
   }
   try {
-    const decoded = jwt.verify(header.split(' ')[1], process.env.JWT_SECRET!) as { id: string };
+    const secret = process.env.JWT_SECRET || 'beauty_hub_fallback_jwt_secret_key_2026';
+    const decoded = jwt.verify(header.split(' ')[1], secret) as { id: string };
     req.adminId = decoded.id;
     next();
   } catch {
