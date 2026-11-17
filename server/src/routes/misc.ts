@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { Settings, Booking, Testimonial } from '../models/index.js';
 import { authMiddleware } from '../middleware/auth.js';
+import { getSalonAiReply } from '../utils/aiAssistant.js';
 
 const router = Router();
 
@@ -147,6 +148,59 @@ router.get('/forecast', async (_req, res) => {
     res.json({ forecast, peak_day: 'Saturday' });
   } catch {
     res.json({ forecast: [], peak_day: 'Saturday' });
+  }
+});
+
+// 24/7 AI Receptionist Chatbot
+router.post('/chat', async (req, res) => {
+  try {
+    const message = req.body?.message || '';
+    if (!message || typeof message !== 'string') {
+      return res.status(400).json({ error: 'Message is required' });
+    }
+
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (apiKey) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
+        const geminiRes = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            signal: controller.signal,
+            body: JSON.stringify({
+              contents: [
+                {
+                  parts: [
+                    {
+                      text: `You are the friendly AI receptionist for The Beauty Hub Salon & Academy in Bilaspur, Rampur, UP. Answer politely and accurately based on salon timings (Sat-Thu 9am-7pm, Friday closed), bridal packages (Normal 15k, HD 20k, Silicone 30k), party makeup (2k-5k), nail extensions (from 2k), hair services, and location (Near Nainital Bank, Matkhera road, Bilaspur): ${message}`,
+                    },
+                  ],
+                },
+              ],
+            }),
+          }
+        );
+        clearTimeout(timeoutId);
+        if (geminiRes.ok) {
+          const geminiData: any = await geminiRes.json();
+          const replyText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (replyText) {
+            return res.json({ reply: replyText });
+          }
+        }
+      } catch {
+        // Fallback to grounded local reply
+      }
+    }
+
+    const reply = getSalonAiReply(message);
+    res.json({ reply });
+  } catch (err) {
+    const reply = getSalonAiReply(req.body?.message || '');
+    res.json({ reply });
   }
 });
 
