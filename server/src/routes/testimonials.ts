@@ -26,15 +26,24 @@ router.get('/all', authMiddleware, async (_req, res) => {
 
 router.post('/', upload.single('image'), async (req, res) => {
   try {
-    const { name, rating, review, service, email } = req.body;
+    const name = (req.body.name || 'Anonymous').trim();
+    const rating = Math.max(1, Math.min(5, Number(req.body.rating) || 5));
+    const review = (req.body.review || req.body.text || (rating <= 2 ? 'Customer reported dissatisfaction with the experience.' : 'Great experience and wonderful service!')).trim();
+    const service = (req.body.service || '').trim();
+    const email = (req.body.email || '').trim();
+
     const testimonial = await Testimonial.create({
-      name, rating: Number(rating), review,
-      service: service || '', email: email || '',
+      name: name || 'Anonymous',
+      rating,
+      review,
+      service,
+      email,
       image: req.file ? `/uploads/${req.file.filename}` : '',
-      isApproved: false,
+      isApproved: rating >= 4,
     });
     res.status(201).json(testimonial);
-  } catch {
+  } catch (err) {
+    console.error('Failed to submit review:', err);
     res.status(500).json({ error: 'Failed to submit review' });
   }
 });

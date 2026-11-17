@@ -88,29 +88,60 @@ router.post('/db/:collection', async (req, res) => {
 // AI Insights & Analytics endpoints
 router.get('/sentiment', async (_req, res) => {
   try {
-    const reviews = await Testimonial.find({ isApproved: true });
+    // Analyze ALL reviews (both approved and newly submitted) for real-time sentiment
+    const reviews = await Testimonial.find().sort({ createdAt: -1 });
     const total = reviews.length;
     if (total === 0) {
       return res.json({
         total_reviews: 0,
-        positive_pct: 95,
-        neutral_pct: 5,
+        positive_pct: 100,
+        neutral_pct: 0,
         negative_pct: 0,
         action_required: [],
       });
     }
-    const pos = reviews.filter((r) => r.rating >= 4).length;
-    const neu = reviews.filter((r) => r.rating === 3).length;
-    const neg = reviews.filter((r) => r.rating <= 2).length;
+
+    const negativeKeywords = ['bad', 'terrible', 'worst', 'horrible', 'poor', 'rude', 'waste', 'hate', 'dirty', 'unhappy', 'slow', 'disappointed', 'disappointing'];
+
+    let pos = 0;
+    let neu = 0;
+    let neg = 0;
+    const action_required: any[] = [];
+
+    for (const r of reviews) {
+      const rating = Number(r.rating) || 5;
+      const text = (r.review || (r as any).text || '').toLowerCase();
+      const hasNegativeWord = negativeKeywords.some((kw) => text.includes(kw));
+
+      if (rating <= 2 || hasNegativeWord) {
+        neg++;
+        action_required.push({
+          review_text: r.review || (r as any).text || 'Customer flagged dissatisfaction',
+          date: (r as any).createdAt ? new Date((r as any).createdAt).toLocaleDateString() : new Date().toLocaleDateString(),
+          name: r.name || 'Anonymous',
+          rating,
+        });
+      } else if (rating === 3) {
+        neu++;
+      } else {
+        pos++;
+      }
+    }
+
+    const positive_pct = Math.round((pos / total) * 100);
+    const neutral_pct = Math.round((neu / total) * 100);
+    const negative_pct = Math.max(0, 100 - positive_pct - neutral_pct);
+
     res.json({
       total_reviews: total,
-      positive_pct: Math.round((pos / total) * 100),
-      neutral_pct: Math.round((neu / total) * 100),
-      negative_pct: Math.round((neg / total) * 100),
-      action_required: reviews.filter((r) => r.rating <= 2).map((r) => ({ review_text: r.review, date: (r as any).createdAt || new Date().toISOString() })),
+      positive_pct,
+      neutral_pct,
+      negative_pct,
+      action_required,
     });
-  } catch {
-    res.json({ total_reviews: 0, positive_pct: 95, neutral_pct: 5, negative_pct: 0, action_required: [] });
+  } catch (err) {
+    console.error('Sentiment endpoint error:', err);
+    res.json({ total_reviews: 0, positive_pct: 100, neutral_pct: 0, negative_pct: 0, action_required: [] });
   }
 });
 

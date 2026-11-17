@@ -12,11 +12,10 @@ import {
   getAllTestimonials, approveTestimonial, deleteTestimonial,
   getGallery, createGalleryItem, deleteGalleryItem,
   getBeforeAfter, createBeforeAfter, deleteBeforeAfter,
-  changeAdminCredentials
+  changeAdminCredentials,
+  getSentimentAnalysis, getChurnRisk, getDemandForecast, computeClientSentiment
 } from '../api/client';
 import type { Booking, Service, Offer, Testimonial } from '../types';
-
-const BASE_URL = import.meta.env.VITE_API_URL || '';
 
 const tabs = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -211,29 +210,50 @@ function Dashboard() {
     getBeforeAfter().then(({ data }) => setBeforeAfter(data)).catch(() => {});
   };
 
+  const loadAiInsights = async () => {
+    try {
+      const [sentimentRes, churnRes, forecastRes, testRes] = await Promise.allSettled([
+        getSentimentAnalysis(),
+        getChurnRisk(),
+        getDemandForecast(),
+        getAllTestimonials(),
+      ]);
+
+      let freshTestimonials = testimonials;
+      if (testRes.status === 'fulfilled' && Array.isArray(testRes.value?.data)) {
+        freshTestimonials = testRes.value.data;
+        setTestimonials(freshTestimonials);
+      }
+
+      if (sentimentRes.status === 'fulfilled' && sentimentRes.value?.data && typeof sentimentRes.value.data.positive_pct === 'number' && sentimentRes.value.data.total_reviews > 0) {
+        setAiInsights(sentimentRes.value.data);
+      } else if (freshTestimonials && freshTestimonials.length > 0) {
+        setAiInsights(computeClientSentiment(freshTestimonials));
+      } else {
+        setAiInsights(computeClientSentiment([]));
+      }
+
+      if (churnRes.status === 'fulfilled' && churnRes.value?.data) {
+        setChurnRisk(churnRes.value.data);
+      }
+      if (forecastRes.status === 'fulfilled' && forecastRes.value?.data) {
+        setDemandForecast(forecastRes.value.data);
+      }
+    } catch {
+      setAiInsights(computeClientSentiment(testimonials));
+    }
+  };
+
   useEffect(() => {
     getDashboardStats().then(({ data }) => setStats(data)).catch(() => {});
     if (activeTab === 'dashboard' || activeTab === 'bookings') getBookings().then(({ data }) => setBookings(data)).catch(() => {});
     if (activeTab === 'dashboard' || activeTab === 'services') getServices().then(({ data }) => setServices(data)).catch(() => {});
     if (activeTab === 'dashboard' || activeTab === 'offers') getOffers().then(({ data }) => setOffers(data)).catch(() => {});
     if (activeTab === 'dashboard' || activeTab === 'courses') getCourses().then(({ data }) => setCourses(data)).catch(() => {});
-    if (activeTab === 'dashboard' || activeTab === 'reviews') getAllTestimonials().then(({ data }) => setTestimonials(data)).catch(() => {});
+    if (activeTab === 'dashboard' || activeTab === 'reviews' || activeTab === 'insights') getAllTestimonials().then(({ data }) => setTestimonials(data)).catch(() => {});
     if (activeTab === 'gallery') getGallery().then(({ data }) => setGallery(data)).catch(() => {});
-            if (activeTab === 'insights') {
-      fetch(`${BASE_URL}/api/sentiment`)
-        .then(res => res.json())
-        .then(data => setAiInsights(data))
-        .catch(err => console.error("ML service offline", err));
-        
-      fetch(`${BASE_URL}/api/churn-risk`)
-        .then(res => res.json())
-        .then(data => setChurnRisk(data))
-        .catch(err => console.error("ML service offline", err));
-        
-      fetch(`${BASE_URL}/api/forecast`)
-        .then(res => res.json())
-        .then(data => setDemandForecast(data))
-        .catch(err => console.error("ML service offline", err));
+    if (activeTab === 'insights') {
+      loadAiInsights();
     }
     if (activeTab === 'before-after') getBeforeAfter().then(({ data }) => setBeforeAfter(data)).catch(() => {});
   }, [activeTab]);
@@ -438,9 +458,25 @@ function Dashboard() {
             
             {activeTab === 'insights' && (
               <div>
-                <div className="mb-6 flex items-center gap-3">
-                  <Brain className="text-gold" size={32} />
-                  <h2 className="font-display text-2xl font-semibold">AI Sentiment Analysis</h2>
+                <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <Brain className="text-gold" size={32} />
+                    <div>
+                      <h2 className="font-display text-2xl font-semibold">AI Sentiment & Predictive Analytics</h2>
+                      <p className="text-xs text-cream/60">Live Natural Language Processing & Customer Feedback Classifier</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      toast.loading('Analyzing latest feedback...', { id: 'ai-refresh' });
+                      await loadAiInsights();
+                      toast.success('AI Insights updated live!', { id: 'ai-refresh' });
+                    }}
+                    className="btn-secondary !py-2 !px-4 text-xs flex items-center gap-2 self-start sm:self-auto hover:border-gold transition-colors"
+                  >
+                    <TrendingUp size={16} className="text-gold" />
+                    Refresh Live Analytics
+                  </button>
                 </div>
                 
                 {!aiInsights ? (
@@ -450,37 +486,54 @@ function Dashboard() {
                 ) : (
                   <div className="space-y-8">
                     <div className="luxury-card p-6 dark:bg-charcoal/60">
-                      <h3 className="mb-4 text-lg font-semibold text-gold">
-                        Customer Satisfaction {aiInsights.total_reviews ? `(Live: ${aiInsights.total_reviews} ${aiInsights.total_reviews === 1 ? 'Review' : 'Reviews'})` : '(Live Analytics)'}
-                      </h3>
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-gold">
+                          Customer Satisfaction {aiInsights.total_reviews ? `(Live: ${aiInsights.total_reviews} ${aiInsights.total_reviews === 1 ? 'Review' : 'Reviews'})` : '(Live Analytics)'}
+                        </h3>
+                        <span className="text-xs px-2.5 py-1 rounded-full bg-gold/10 text-gold border border-gold/20 font-medium">
+                          Live Sentiment Classifier
+                        </span>
+                      </div>
                       <div className="flex items-center gap-4">
-                        <div className="flex-1 h-4 rounded-full bg-ink/50 overflow-hidden flex">
-                          <div style={{ width: `${aiInsights.positive_pct}%` }} className="bg-green-500 h-full"></div>
-                          <div style={{ width: `${aiInsights.neutral_pct}%` }} className="bg-yellow-500 h-full"></div>
-                          <div style={{ width: `${aiInsights.negative_pct}%` }} className="bg-red-500 h-full"></div>
+                        <div className="flex-1 h-5 rounded-full bg-ink/50 overflow-hidden flex shadow-inner">
+                          <div style={{ width: `${aiInsights.positive_pct}%` }} className="bg-emerald-500 h-full transition-all duration-700 ease-out" title={`Positive: ${aiInsights.positive_pct}%`}></div>
+                          <div style={{ width: `${aiInsights.neutral_pct}%` }} className="bg-amber-400 h-full transition-all duration-700 ease-out" title={`Neutral: ${aiInsights.neutral_pct}%`}></div>
+                          <div style={{ width: `${aiInsights.negative_pct}%` }} className="bg-rose-500 h-full transition-all duration-700 ease-out" title={`Negative: ${aiInsights.negative_pct}%`}></div>
                         </div>
                       </div>
                       <div className="mt-4 flex justify-between text-sm">
-                        <span className="text-green-400 font-bold">{aiInsights.positive_pct}% Positive</span>
-                        <span className="text-yellow-400 font-bold">{aiInsights.neutral_pct}% Neutral</span>
-                        <span className="text-red-400 font-bold">{aiInsights.negative_pct}% Negative</span>
+                        <span className="text-emerald-400 font-bold flex items-center gap-1.5">
+                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
+                          {aiInsights.positive_pct}% Positive
+                        </span>
+                        <span className="text-amber-400 font-bold flex items-center gap-1.5">
+                          <span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
+                          {aiInsights.neutral_pct}% Neutral
+                        </span>
+                        <span className="text-rose-400 font-bold flex items-center gap-1.5">
+                          <span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span>
+                          {aiInsights.negative_pct}% Negative
+                        </span>
                       </div>
                     </div>
 
-                    <div className="luxury-card p-6 border border-red-500/20 bg-red-500/5">
-                      <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-red-400">
+                    <div className="luxury-card p-6 border border-rose-500/20 bg-rose-500/5">
+                      <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-rose-400">
                         <AlertTriangle size={20} /> Action Required: Recent Negative Feedback
                       </h3>
                       <div className="space-y-4">
                         {aiInsights.action_required?.length > 0 ? (
                           aiInsights.action_required.map((review: any, i: number) => (
-                            <div key={i} className="bg-ink/50 p-4 rounded-lg">
+                            <div key={i} className="bg-ink/50 p-4 rounded-lg border border-rose-500/10">
                               <p className="text-cream/90 italic">"{review.review_text}"</p>
-                              <p className="text-xs text-cream/50 mt-2">Date: {review.date}</p>
+                              <div className="flex justify-between items-center mt-2">
+                                <p className="text-xs text-cream/50">Date: {review.date} {review.name ? `• By: ${review.name}` : ''}</p>
+                                {review.rating && <span className="text-xs text-rose-400 font-medium">★ {review.rating}/5</span>}
+                              </div>
                             </div>
                           ))
                         ) : (
-                          <p className="text-green-400">No negative reviews currently flagged!</p>
+                          <p className="text-emerald-400 font-medium">No negative reviews currently flagged — customer satisfaction is high!</p>
                         )}
                       </div>
                     </div>

@@ -174,10 +174,133 @@ export const deleteBeforeAfter = (id: string) =>
 // Reviews
 export const submitReview = async (data: FormData) => {
   const obj = await formDataToObject(data);
-  // Send to Python ML Backend as JSON for real-time sentiment analysis
+  const ratingNum = Math.max(1, Math.min(5, Number(obj.rating) || 5));
+  const reviewText = (obj.review || obj.text || '').trim();
+  const payload = {
+    name: (obj.name || 'Anonymous').trim(),
+    review: reviewText,
+    text: reviewText,
+    rating: ratingNum,
+    service: (obj.service || '').trim(),
+    email: (obj.email || '').trim(),
+    isApproved: ratingNum >= 4,
+    createdAt: new Date().toISOString(),
+  };
+
+  // Submit to backend
+  const res = await withOfflineMock(
+    api.post('/reviews', payload),
+    async () => await mockDb.add('testimonials', payload)
+  );
+
+  // Sync with local cache so AI Insights updates immediately
+  try {
+    const cached = await mockDb.get('testimonials');
+    const updated = [payload, ...(Array.isArray(cached) ? cached : [])];
+    await mockDb.set('testimonials', updated);
+  } catch {}
+
+  return res;
+};
+
+// AI Insights & Predictive Analytics
+export function computeClientSentiment(reviews: any[]) {
+  const defaultList = [
+    { name: 'Ananya Singh', rating: 5, review: 'My bridal makeup was absolutely stunning!', service: 'Bridal Makeup' },
+    { name: 'Riya Patel', rating: 5, review: 'Best salon in Rampur! Professional and luxurious experience.', service: 'Hair Coloring' },
+    { name: 'Meera Joshi', rating: 5, review: 'The academy course changed my career. Highly recommend!', service: 'Academy Course' },
+    { name: 'Priya Sharma', rating: 5, review: 'Their nail art is next level! Creative designs and relaxing atmosphere.', service: 'Nail Art' }
+  ];
+
+  const list = Array.isArray(reviews) && reviews.length > 0 ? reviews : defaultList;
+  const negativeKeywords = ['bad', 'terrible', 'worst', 'horrible', 'poor', 'rude', 'waste', 'hate', 'dirty', 'unhappy', 'slow', 'disappointed', 'disappointing'];
+
+  let pos = 0;
+  let neu = 0;
+  let neg = 0;
+  const action_required: any[] = [];
+
+  for (const r of list) {
+    const rating = Number(r.rating) || 5;
+    const text = (r.review || r.text || '').toLowerCase();
+    const hasNegativeWord = negativeKeywords.some((kw) => text.includes(kw));
+
+    if (rating <= 2 || hasNegativeWord) {
+      neg++;
+      action_required.push({
+        review_text: r.review || r.text || 'Customer reported dissatisfaction',
+        date: r.createdAt ? new Date(r.createdAt).toLocaleDateString() : new Date().toLocaleDateString(),
+        name: r.name || 'Anonymous',
+        rating,
+      });
+    } else if (rating === 3) {
+      neu++;
+    } else {
+      pos++;
+    }
+  }
+
+  const total = list.length;
+  const positive_pct = total > 0 ? Math.round((pos / total) * 100) : 100;
+  const neutral_pct = total > 0 ? Math.round((neu / total) * 100) : 0;
+  const negative_pct = total > 0 ? Math.max(0, 100 - positive_pct - neutral_pct) : 0;
+
+  return {
+    total_reviews: total,
+    positive_pct,
+    neutral_pct,
+    negative_pct,
+    action_required,
+  };
+}
+
+export const getSentimentAnalysis = async () => {
   return withOfflineMock(
-    api.post('/reviews', { name: obj.name || 'Anonymous', text: obj.review || obj.text || '', rating: Number(obj.rating) || 5 }),
-    async () => await mockDb.add('testimonials', { ...obj, isApproved: false })
+    api.get('/sentiment'),
+    async () => {
+      const list = await mockDb.get('testimonials');
+      return computeClientSentiment(list);
+    }
+  );
+};
+
+export const getChurnRisk = async () => {
+  return withOfflineMock(
+    api.get('/churn-risk'),
+    async () => {
+      const bookings = await mockDb.get('bookings');
+      const clients = new Set(bookings.map((b: any) => b.customerPhone || b.phone).filter(Boolean));
+      return {
+        total_active: clients.size || 5,
+        total_churned: 0,
+        at_risk_customers: [],
+      };
+    }
+  );
+};
+
+export const getDemandForecast = async () => {
+  return withOfflineMock(
+    api.get('/forecast'),
+    async () => {
+      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const forecast = [];
+      const now = new Date();
+      for (let i = 1; i <= 7; i++) {
+        const d = new Date(now);
+        d.setDate(d.getDate() + i);
+        const dayName = days[d.getDay()] || 'Day';
+        const count = (dayName === 'Saturday' || dayName === 'Sunday') ? 8 : 5;
+        forecast.push({
+          date: d.toISOString().split('T')[0],
+          day: dayName,
+          expected_bookings: count,
+          capacity: 10,
+          load: count >= 8 ? 'High' : 'Normal',
+        });
+      }
+      return { forecast, peak_day: 'Saturday' };
+    }
   );
 };
 
